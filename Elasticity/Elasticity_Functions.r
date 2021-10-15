@@ -1,3 +1,12 @@
+#' ---
+#' title: "Template: Elasticity Functions"
+#' author: "Lila Sahar and Juan Malaver"
+#' date: "October 15, 2021"
+#' output: github_document
+#' ---
+#' 
+#' 
+
 ## loading libraries
 library(tidyverse)
 library(readxl)
@@ -81,41 +90,41 @@ plot_scatter <- function(sales_sample_tbl){
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
 }
 
-# Testing Functions ----
-## setting file paths
-descriptions_path <- "raw_data_cereal_descriptions.xlsx"
-prices_path <- "raw_data_cereal_prices.xlsx"
-
-descriptions_tbl <- input_descriptions(descriptions_path)
-prices_tbl <- input_prices(prices_path)
-
-top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
-
-sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
-
-sales_sample_tbl <- get_sales_sample(sales_tbl)
-
-plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
-plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
-
-plot_scatter(sales_sample_tbl)
-
-# Testing Function pt. 2 ----
-hchart(density((sales_tbl %>%
-                 filter(description == "CINNAMON TOAST CRUNC") %>%
-                 mutate(sales = log(sales)))$sales),
-       type = "area", name = "Cinammon Toast Crunch") %>%
-  hc_add_series(
-    density((sales_tbl %>%
-              filter(description == "KIX") %>%
-              mutate(sales = log(sales)))$sales),
-    type = "area",
-    name = "KIX"
-  ) %>%
-  hc_add_series(
-    density((sales_tbl %>%
-              filter(description == "WHEATIES") %>%
-              mutate(sales = log(sales)))$sales),
-    type = "area",
-    name = "Wheaties"
-  )
+# # Testing Functions ----
+# ## setting file paths
+# descriptions_path <- "raw_data_cereal_descriptions.xlsx"
+# prices_path <- "raw_data_cereal_prices.xlsx"
+# 
+# descriptions_tbl <- input_descriptions(descriptions_path)
+# prices_tbl <- input_prices(prices_path)
+# 
+# top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
+# 
+# sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+# 
+# sales_sample_tbl <- get_sales_sample(sales_tbl)
+# 
+# plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+# plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+# 
+# plot_scatter(sales_sample_tbl)
+# 
+# # Testing Function pt. 2 ----
+# hchart(density((sales_tbl %>%
+#                  filter(description == "CINNAMON TOAST CRUNC") %>%
+#                  mutate(sales = log(sales)))$sales),
+#        type = "area", name = "Cinammon Toast Crunch") %>%
+#   hc_add_series(
+#     density((sales_tbl %>%
+#               filter(description == "KIX") %>%
+#               mutate(sales = log(sales)))$sales),
+#     type = "area",
+#     name = "KIX"
+#   ) %>%
+#   hc_add_series(
+#     density((sales_tbl %>%
+#               filter(description == "WHEATIES") %>%
+#               mutate(sales = log(sales)))$sales),
+#     type = "area",
+#     name = "Wheaties"
+#   )
