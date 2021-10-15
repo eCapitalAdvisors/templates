@@ -1,0 +1,47 @@
+---
+title: 'Elasticity Documentation'
+author: "Lila Sahar and Juan Malaver"
+date: "10/15/2021"
+output: html_document
+---
+
+```{r, include = FALSE}
+source("Elasticity_Functions.r", local = knitr::knit_global())
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(readxl)
+
+#importing data
+descriptions_path <- "raw_data_cereal_descriptions.xlsx"
+prices_path <- "raw_data_cereal_prices.xlsx"
+
+descriptions_tbl <- input_descriptions(descriptions_path)
+prices_tbl <- input_prices(prices_path)
+```
+
+
+```{r, echo = FALSE}
+top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
+```
+
+```{r, echo = FALSE}
+sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+```
+
+```{r, echo = FALSE}
+sales_sample_tbl <- get_sales_sample(sales_tbl)
+```
+
+```{r, echo = FALSE}
+plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+```
+
+```{r, echo = FALSE}
+plot_scatter(sales_sample_tbl)
+```
+
