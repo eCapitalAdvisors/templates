@@ -49,10 +49,20 @@ get_sales_sample <- function(sales_tbl){
     sample_n(1000)
 }
 
-plot_histogram <- function(sales_tbl, x_title, title_chart){
+plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
-  #graphing a histogram
+  #graphing a histogram for sales
   ggplot(data = sales_tbl, aes(x = log(sales))) + 
+    geom_density(adjust = 5, aes(fill = description), alpha = .8) +
+    labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
+    scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
+}
+
+plot_histogram_price <- function(sales_tbl, x_title, title_chart){
+  
+  #graphing a histogram for price
+  ggplot(data = sales_tbl, aes(x = log(price))) + 
     geom_density(adjust = 5, aes(fill = description), alpha = .8) +
     xlim(0, 2) + 
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
@@ -60,7 +70,16 @@ plot_histogram <- function(sales_tbl, x_title, title_chart){
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
 }
 
-plot_scatter <- function(){}
+plot_scatter <- function(sales_sample_tbl){
+  ggplot(data = sales_sample_tbl, aes(x = log(price), y = log(sales))) +
+    geom_point(aes(color = description), alpha = .8) +
+    xlim(0, 1.75) +
+    labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
+         title = "Price vs. Box Sales", caption = "The x and y values
+       are transformed on a log scale.") +
+    scale_color_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
+}
 
 # Testing Functions ----
 ## setting file paths
@@ -76,8 +95,10 @@ sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
 
 sales_sample_tbl <- get_sales_sample(sales_tbl)
 
-plot_histogram(sales_tbl, "Number of Cereal Boxes Sold", "Distribution of Sales")
+plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 
+plot_scatter(sales_sample_tbl)
 
 # Testing Function pt. 2 ----
 hchart(density((sales_tbl %>%
