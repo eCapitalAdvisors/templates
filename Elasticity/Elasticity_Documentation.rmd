@@ -1,8 +1,10 @@
 ---
 title: 'Elasticity Documentation'
-author: "Lila Sahar and Juan Malaver"
+author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
 date: "10/18/2021"
-output: html_document
+output: 
+  pdf_document:
+    df_print: kable
 ---
 
 ```{r, include = FALSE}
@@ -60,12 +62,12 @@ head(sales_tbl)
 
 This shows that the data follows a bell shaped distribution (relatively normal) after we transform the data with logarithms.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE}
 plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, warning = FALSE}
 # Cereal Data Sample
 sales_sample_tbl <- get_sales_sample(sales_tbl)
 ```
@@ -95,18 +97,18 @@ $$y|\boldsymbol{x}\sim \mathcal{N}(\boldsymbol{x'\beta},\sigma^2)$$
 
 ### Interpretting the results
 
-If the good is inelastic, then |$\beta\$| < 1. This means that if the price were to increase, the revenue for the firm is likely to increase.
+If the good is inelastic, then $\left|\beta\right|$ < 1. This means that if the price were to increase, the revenue for the firm is likely to increase.
 
-If the good is elastic, then |$\beta\$| > 1. This means that if the price were to increase, the revenue for the firm is likely to decrease.
+If the good is elastic, then $\left|\beta\right|$ > 1. This means that if the price were to increase, the revenue for the firm is likely to decrease.
 
-If the good is unitary elastic, then |$\beta\$| = 1. This means the regardless of the price, the revenue is likely to stay relatively the same.
+If the good is unitary elastic, then $\left|\beta\right|$ = 1. This means the regardless of the price, the revenue is likely to stay relatively the same.
 
 ```{r, echo = FALSE}
 mod <- glm(log(sales) ~ log(price) + description, data = sales_tbl)
 tidy(mod)
 ```
 
-In this model, the price is inelastic (1.1653472 > 1). This means that if the price were to increase, the revenue for the firm is likely to decrease.
+In this model, the price is inelastic (|-1.17| > 1). This means that if the price were to increase, the revenue for the firm is likely to decrease.
 
 ## What does this mean regarding competitors?
 
@@ -123,21 +125,23 @@ If the income elasticity is zero, the good does not change the quantity demanded
 **Cross Elasticity** - The percentage change in quantity demanded of good A is proportional to the percentage change in quantity demanded of good B.
 
 If cross elasticity is positive, the goods are substitutes. This means that the demand for good A will increase as the price of good B increases.
-For example, iPhone and Andriod Phones.
+For example, iPhone and Android Phones.
 
-If cross elasticity is negative, the goods are complimentary. This means that the demand for good A will increase as the price of good B decreases.
+If cross elasticity is negative, the goods are complements. This means that the demand for good A will increase as the price of good B decreases.
 For example, cereal and milk.
 
 If the cross elasticity is zero, the demand for good A is not effected by the price change in good B.
 
 **Price Elasticity of Supply** - The percentage change in quantity supplied is proportional to the percentage change in price.
 
-If absolute value of price elasticity of supply > 1, the supply is elastic. This means that the good is luxury; thus, an increase in price correlates to a decrease in consumption. 
-For example, movie tickets.
+If the absolute value of price elasticity of supply > 1, the good is elastic. The percentage change in quantity supplied is proportionally lower than percentage change in price.
 
-If absolute value of price elasticity of supply < 1, the supply is inelastic. This means that the good is a necessity; thus, an increase in price does not correlate to a significant change in quantity demanded.
-For example, gas.
+If the absolute value of price elasticity of supply < 1, the good is inelastic. The percentage change in quantity supplied is proportionally higher than percentage change in price.
 
-If absolute value of price elasticity of supply = 1, the supply is vertical. This means that there is no response to prices.
+If absolute value of price elasticity of supply = 1, the good is unit elastic. The percentage change in quantity supplied is proportionally equal to percentage change in price.
 
+## References
 
+Taddy, M. (2019). *Business data science: Combining machine learning and economics to optimize, automate, and accelerate business decisions* (1 Edition). McGraw-Hill Education.
+
+Varian, H. R. (2014). *Intermediate microeconomics: A modern approach* (Ninth edition, international student edition). W.W. Norton & Company.
