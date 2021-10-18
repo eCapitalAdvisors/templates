@@ -1,13 +1,25 @@
 ---
 title: 'Elasticity Documentation'
 author: "Lila Sahar and Juan Malaver"
-date: "10/15/2021"
+date: "10/18/2021"
 output: html_document
 ---
 
 ```{r, include = FALSE}
 source("Elasticity_Functions.r", local = knitr::knit_global())
 ```
+
+## Introduction
+
+### What is Elasticity?
+
+Elasticity is the change in consumers' demand in response to price changes. 
+
+### Why is Elasticity important?
+
+The elasticity helps businesses price their products and services, and it will 
+help a company predict how the market will react when you do change a price of 
+service or product.
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -23,25 +35,36 @@ descriptions_tbl <- input_descriptions(descriptions_path)
 prices_tbl <- input_prices(prices_path)
 ```
 
+## Business Problem
 
-```{r, echo = FALSE}
-top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
-```
+We will use *price elasticity of demand* ($\beta$) to understand how changes in
+`price` impact changes in `sales`.
+
+$$\text{log}(\texttt{sales})=\alpha+\beta\text{log}(\texttt{price})+\epsilon$$
+
+## Cereal Data
 
 ```{r, echo = FALSE}
 sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
 ```
 
-```{r, echo = FALSE}
-sales_sample_tbl <- get_sales_sample(sales_tbl)
-```
+## Distribution of Sales and Price by Brand
 
 ```{r, echo = FALSE}
 plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
 
+## Cereal Data Sample
+
+```{r, echo = FALSE}
+sales_sample_tbl <- get_sales_sample(sales_tbl)
+```
+
+## Prices and Sales by Brand
+
 ```{r, echo = FALSE}
 plot_scatter(sales_sample_tbl)
 ```
 
+## Interpreting Price Elasticity
