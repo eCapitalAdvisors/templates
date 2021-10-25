@@ -1,0 +1,59 @@
+---
+title: "Static Elasticity Flexdashboard"
+author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
+date: "10/25/2021"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: simplex
+---
+#sourcing my code from 'Elasticity_Functions.r'
+```{r, include=FALSE}
+source("../r_code/Elasticity_Functions.r", local = knitr::knit_global())
+```
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+
+#importing data
+descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
+prices_path <- "../data/raw_data_cereal_prices.xlsx"
+
+descriptions_tbl <- input_descriptions(descriptions_path)
+prices_tbl <- input_prices(prices_path)
+```
+```{r, include = FALSE}
+#obtaining our data tables
+top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
+sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+sales_sample_tbl <- get_sales_sample(sales_tbl)
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Scatter Plot for Sales vs. Price
+
+```{r static_plot, echo = FALSE, warning = FALSE}
+#scatter plot for quantity vs price
+plot_scatter(sales_sample_tbl)
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Histogram of Sales
+
+```{r, echo = FALSE, warning = FALSE}
+plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+```
+
+### Histogram of Price
+
+```{r, echo = FALSE, warning = FALSE}
+plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+```
