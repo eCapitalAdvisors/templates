@@ -1,28 +1,27 @@
 ---
-title: "Static Elasticity Flex Dashboard"
+title: "Static Elasticity Flexdashboard"
 author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
 date: "10/25/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
-    source_code: embed
     theme: simplex
 ---
 #sourcing my code from 'Elasticity_Functions.r'
 ```{r, include=FALSE}
-source("Elasticity.r", local = knitr::knit_global())
+source("../r_code/Elasticity_Functions.r", local = knitr::knit_global())
 ```
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
-library(readr)
+library(tidyverse)
+library(readxl)
 library(ggplot2)
-library(plotly)
 
 #importing data
-descriptions_path <- "../raw_data_cereal_descriptions.xlsx"
-prices_path <- "raw_data_cereal_prices.xlsx"
+descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
+prices_path <- "../data/raw_data_cereal_prices.xlsx"
 
 descriptions_tbl <- input_descriptions(descriptions_path)
 prices_tbl <- input_prices(prices_path)
