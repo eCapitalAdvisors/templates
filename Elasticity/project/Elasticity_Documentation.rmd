@@ -1,0 +1,147 @@
+---
+title: 'Elasticity Documentation'
+author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
+date: "10/18/2021"
+output: 
+  pdf_document:
+    df_print: kable
+---
+
+```{r, include = FALSE}
+source("Elasticity_Functions.r", local = knitr::knit_global())
+```
+
+## Introduction
+
+### What is Elasticity?
+
+Elasticity is the percentage change in consumer demand in response to price changes. 
+
+### Why is Elasticity important?
+
+Elasticity helps businesses price their products and services. As it quantifies the relationship between sales and prices, it will help a company predict how the market will react when you change the price of a service or product.
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(broom)
+library(readxl)
+
+#importing data
+descriptions_path <- "raw_data_cereal_descriptions.xlsx"
+prices_path <- "raw_data_cereal_prices.xlsx"
+
+descriptions_tbl <- input_descriptions(descriptions_path)
+prices_tbl <- input_prices(prices_path)
+```
+
+## Business Problem
+
+We will use *price elasticity of demand* ($\beta$) to understand how changes in `price` impact changes in `sales`.
+
+$$\text{log}(\texttt{sales})=\alpha+\beta\text{log}(\texttt{price})+\epsilon$$
+
+## Cereal Data
+
+```{r, include = FALSE}
+top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
+```
+
+Our data table:
+
+```{r, include = FALSE}
+sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+```
+
+```{r, echo = FALSE}
+head(sales_tbl)
+```
+
+## Distribution of Sales and Price by Brand
+
+This shows that the data follows a bell shaped distribution (relatively normal) after we transform the data with logarithms.
+
+```{r, echo = FALSE, warning = FALSE}
+plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+```
+
+```{r, include = FALSE, warning = FALSE}
+# Cereal Data Sample
+sales_sample_tbl <- get_sales_sample(sales_tbl)
+```
+
+## Prices and Sales by Brand
+
+The y and x variables have a somewhat linear relationship after transforming it with logarithms.
+
+```{r, echo = FALSE}
+plot_scatter(sales_sample_tbl)
+```
+
+## Interpreting Price Elasticity
+
+**Inelastic**: The percentage change in quantity demanded is proportionally lower than percentage change in price.
+
+**Elastic**: The percentage change in quantity demanded is proportionally higher than percentage change in price.
+
+`sales` increase by $\beta\%$ for every $1\%$ increase in `price`.
+
+$$\frac{dy}{dx}=\frac{\beta}{x}e^{\alpha+\beta\text{log}(x)+\epsilon}\Rightarrow\beta=\frac{dy/y}{dx/x}$$
+
+`sales` and `price` must be strictly non-negative and we assume their conditional *distribution* follows
+a Normal distribution.
+
+$$y|\boldsymbol{x}\sim \mathcal{N}(\boldsymbol{x'\beta},\sigma^2)$$
+
+### Interpretting the results
+
+If the good is inelastic, then $\left|\beta\right|$ < 1. This means that if the price were to increase, the revenue for the firm is likely to increase.
+
+If the good is elastic, then $\left|\beta\right|$ > 1. This means that if the price were to increase, the revenue for the firm is likely to decrease.
+
+If the good is unitary elastic, then $\left|\beta\right|$ = 1. This means the regardless of the price, the revenue is likely to stay relatively the same.
+
+```{r, echo = FALSE}
+mod <- glm(log(sales) ~ log(price) + description, data = sales_tbl)
+tidy(mod)
+```
+
+In this model, the price is inelastic (|-1.17| > 1). This means that if the price were to increase, the revenue for the firm is likely to decrease.
+
+## What does this mean regarding competitors?
+
+**Income Elasticity** - The percentage change in quantity demanded is proportional to the percentage change in income of the consumer.
+
+If the income elasticity is negative, the good is inferior. This means that an increase in income will lead to a fall in the quantity demanded.
+For example, store-brand grocery products.
+
+If the income elasticity is positive, the good is normal. This means that an increase in income will lead to a rise in quantity demanded.
+For example, clothing.
+
+If the income elasticity is zero, the good does not change the quantity demanded of the good.
+
+**Cross Elasticity** - The percentage change in quantity demanded of good A is proportional to the percentage change in quantity demanded of good B.
+
+If cross elasticity is positive, the goods are substitutes. This means that the demand for good A will increase as the price of good B increases.
+For example, iPhone and Android Phones.
+
+If cross elasticity is negative, the goods are complements. This means that the demand for good A will increase as the price of good B decreases.
+For example, cereal and milk.
+
+If the cross elasticity is zero, the demand for good A is not effected by the price change in good B.
+
+**Price Elasticity of Supply** - The percentage change in quantity supplied is proportional to the percentage change in price.
+
+If the absolute value of price elasticity of supply > 1, the good is elastic. The percentage change in quantity supplied is proportionally lower than percentage change in price.
+
+If the absolute value of price elasticity of supply < 1, the good is inelastic. The percentage change in quantity supplied is proportionally higher than percentage change in price.
+
+If absolute value of price elasticity of supply = 1, the good is unit elastic. The percentage change in quantity supplied is proportionally equal to percentage change in price.
+
+## References
+
+Taddy, M. (2019). *Business data science: Combining machine learning and economics to optimize, automate, and accelerate business decisions* (1 Edition). McGraw-Hill Education.
+
+Varian, H. R. (2014). *Intermediate microeconomics: A modern approach* (Ninth edition, international student edition). W.W. Norton & Company.
