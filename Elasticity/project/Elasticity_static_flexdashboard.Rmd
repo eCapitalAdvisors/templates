@@ -33,17 +33,25 @@ sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
 sales_sample_tbl <- get_sales_sample(sales_tbl)
 ```
 
-Column
+Page 1
+=======================================================================
+
+Column {.tabset}
 -----------------------------------------------------------------------
 
-### Scatter Plot for Sales vs. Price
+### Box plot of Sales by Brand
 
-```{r static_plot, echo = FALSE, warning = FALSE}
-#scatter plot for quantity vs price
-plot_scatter(sales_sample_tbl)
+```{r, echo = FALSE, warning = FALSE}
+plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 ```
 
-Column
+### Box plot of Prices by Brand
+
+```{r, echo = FALSE, warning = FALSE}
+plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+```
+
+Column {.tabset}
 -----------------------------------------------------------------------
 
 ### Histogram of Sales
@@ -56,4 +64,14 @@ plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales"
 
 ```{r, echo = FALSE, warning = FALSE}
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Scatter Plot for Sales vs. Price
+
+```{r static_plot, echo = FALSE, warning = FALSE}
+#scatter plot for quantity vs price
+plot_scatter(sales_sample_tbl)
 ```
