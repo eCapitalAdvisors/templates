@@ -58,16 +58,6 @@ get_sales_sample <- function(sales_tbl){
     sample_n(1000)
 }
 
-plot_boxplot <- function(sales_tbl, x_title, y_title, title_chart) {
-  
-  #graphing a box plot
-  ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
-    geom_boxplot() +
-    labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
-    scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5))
-}
-
 plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
   #graphing a histogram for sales
@@ -75,7 +65,7 @@ plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
     geom_density(adjust = 5, aes(fill = description), alpha = .8) +
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
 }
 
 plot_histogram_price <- function(sales_tbl, x_title, title_chart){
@@ -86,7 +76,7 @@ plot_histogram_price <- function(sales_tbl, x_title, title_chart){
     xlim(0, 2) + 
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
 }
 
 plot_scatter <- function(sales_sample_tbl){
@@ -96,7 +86,8 @@ plot_scatter <- function(sales_sample_tbl){
     labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
          title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.") +
-    theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    scale_color_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"))
 }
 
 # # Testing Functions ----
@@ -112,8 +103,6 @@ plot_scatter <- function(sales_sample_tbl){
 # sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
 # 
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
-#
-# plot_boxplot(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # 
 # plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
