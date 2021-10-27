@@ -1,2 +1,7 @@
 CustomerChurn/credentials/settings.py
 CustomerChurn/credentials/.env
+.Rproj.user
+.RData
+*.xlsx
+.Rhistory
+*.Rproj
