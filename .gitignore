@@ -5,3 +5,6 @@ CustomerChurn/credentials/.env
 *.xlsx
 .Rhistory
 *.Rproj
+*.html
+*.pdf
+*.csv
