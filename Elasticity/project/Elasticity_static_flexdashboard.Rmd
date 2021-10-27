@@ -4,12 +4,13 @@ author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
 date: "10/25/2021"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     vertical_layout: fill
     theme: simplex
 ---
-#sourcing my code from 'Elasticity_Functions.r'
+
 ```{r, include=FALSE}
+#sourcing my code from 'Elasticity_Functions.r'
 source("../r_code/Elasticity_Functions.r", local = knitr::knit_global())
 ```
 
@@ -66,7 +67,10 @@ plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales"
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
 
-Column
+Page 2
+=======================================================================
+
+Column {.tabset}
 -----------------------------------------------------------------------
 
 ### Scatter Plot for Sales vs. Price
@@ -74,4 +78,18 @@ Column
 ```{r static_plot, echo = FALSE, warning = FALSE}
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl)
+```
+
+### Random Intercepts
+
+```{r static_plot_2, echo = FALSE, warning = FALSE}
+#scatter plot for quantity vs price
+plot_scatter(sales_sample_tbl, model = "RI")
+```
+
+### Random Intercepts Random Slopes
+
+```{r static_plot_3, echo = FALSE, warning = FALSE}
+#scatter plot for quantity vs price
+plot_scatter(sales_sample_tbl, model = "RIRS")
 ```

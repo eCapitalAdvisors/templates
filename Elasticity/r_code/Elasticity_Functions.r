@@ -9,6 +9,7 @@
 
 ## loading libraries
 library(tidyverse)
+library(plotly)
 library(readxl)
 
 ## function for sales and price data
@@ -61,52 +62,95 @@ get_sales_sample <- function(sales_tbl){
 plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
   
   #graphing a box plot
-  ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5))
-}
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+  
+  ggplotly(p)
+  }
 
 plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
   
   #graphing a box plot
-  ggplot(data = sales_tbl, aes(x = description, y = log(price), color = description)) +
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(price), color = description)) +
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5))
-}
+    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+
+  ggplotly(p)
+  }
 
 plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
   #graphing a histogram for sales
-  ggplot(data = sales_tbl, aes(x = log(sales))) + 
+  p <- ggplot(data = sales_tbl, aes(x = log(sales))) + 
     geom_density(adjust = 5, aes(fill = description), alpha = .8) +
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
-}
+
+  ggplotly(p)
+  }
 
 plot_histogram_price <- function(sales_tbl, x_title, title_chart){
   
   #graphing a histogram for price
-  ggplot(data = sales_tbl, aes(x = log(price))) + 
+  p <- ggplot(data = sales_tbl, aes(x = log(price))) + 
     geom_density(adjust = 5, aes(fill = description), alpha = .8) +
     xlim(0, 2) + 
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
-}
 
-plot_scatter <- function(sales_sample_tbl){
-  ggplot(data = sales_sample_tbl, aes(x = log(price), y = log(sales))) +
-    geom_point(aes(color = description), alpha = .8) +
-    xlim(0, 1.75) +
-    labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
-         title = "Price vs. Box Sales", caption = "The x and y values
+  ggplotly(p)
+  }
+
+plot_scatter <- function(sales_sample_tbl, model = "none"){
+  
+  if (model == "RI") {
+    mod <- glm(log(sales) ~ log(price) + description, data = sales_sample_tbl)
+    
+    p <- ggplot(data = cbind(sales_sample_tbl, pred = predict(mod)), aes(x = log(price), y = log(sales))) +
+      geom_point(col = "gray", alpha = .8) +
+      geom_line(aes(y = pred, color = description), size = 1) + 
+      xlim(0, 1.75) +
+      labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
+           title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.") +
-    theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    
+    ggplotly(p) 
+  }
+  else if (model == "RIRS") {
+    mod <- glm(log(sales) ~ log(price) * description, data = sales_sample_tbl)
+    
+    p <- ggplot(data = cbind(sales_sample_tbl, pred = predict(mod)), aes(x = log(price), y = log(sales))) +
+      geom_point(col = "gray", alpha = .8) +
+      geom_line(aes(y = pred, color = description), size = 1) + 
+      xlim(0, 1.75) +
+      labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
+           title = "Price vs. Box Sales", caption = "The x and y values
+       are transformed on a log scale.") +
+      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    
+    ggplotly(p)
+  }
+  else {
+    p <- ggplot(data = sales_sample_tbl, aes(x = log(price), y = log(sales))) +
+      geom_point(aes(color = description), alpha = .8) +
+      xlim(0, 1.75) +
+      labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
+           title = "Price vs. Box Sales", caption = "The x and y values
+       are transformed on a log scale.") +
+      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    
+    ggplotly(p) 
+  }
 }
 
 # # Testing Functions ----
