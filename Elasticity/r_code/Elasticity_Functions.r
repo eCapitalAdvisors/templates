@@ -66,7 +66,8 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5)) +
+    scale_fill_discrete(guide = FALSE) +
+    theme(plot.title = element_text(hjust = .5), plot.caption = element_text(hjust = .5)) +
     coord_flip()
   
   ggplotly(p)
@@ -152,6 +153,14 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
     ggplotly(p) 
   }
 }
+
+plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
+  plot(lm(var1~var2, data = sales_sample_tbl))
+}
+
+#plot_bootstrap_coefficient <- function() {
+#  plot()
+#}
 
 # # Testing Functions ----
 # ## setting file paths
