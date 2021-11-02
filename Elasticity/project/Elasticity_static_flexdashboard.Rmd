@@ -37,40 +37,44 @@ sales_sample_tbl <- get_sales_sample(sales_tbl)
 Page 1
 =======================================================================
 
-Column {.tabset}
+Row 1 {.tabset}
 -----------------------------------------------------------------------
 
-### Box plot of Sales by Brand
+### Box Plot of Sales by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
+#box plot of sales by brand
 plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 ```
 
-### Box plot of Prices by Brand
+### Box Plot of Prices by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
+#box plot of prices by brand
 plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 ```
 
-Column {.tabset}
+Row 2 {.tabset}
 -----------------------------------------------------------------------
 
 ### Histogram of Sales
 
 ```{r, echo = FALSE, warning = FALSE}
+#histogram for sales
 plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 ```
 
 ### Histogram of Price
 
 ```{r, echo = FALSE, warning = FALSE}
+#histogram for price
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
 
 Page 2
 =======================================================================
 
-Column {.tabset}
+Row 1 {.tabset}
 -----------------------------------------------------------------------
 
 ### Scatter Plot for Sales vs. Price
@@ -93,3 +97,29 @@ plot_scatter(sales_sample_tbl, model = "RI")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl, model = "RIRS")
 ```
+
+Page 3
+=======================================================================
+
+Row 1
+-----------------------------------------------------------------------
+
+### Residuals vs Fitted
+
+```{r, echo = FALSE, warning = FALSE}
+#plot of residuals vs fitted
+plot_residuals_vs_fitted(log(sales_sample_tbl$sales), log(sales_sample_tbl$price), sales_sample_tbl)
+```
+
+Row 2
+-----------------------------------------------------------------------
+
+### Bootstrap Coefficient
+
+```{r, echo = FALSE, warning = FALSE}
+##plot of bootstrap coefficient
+#plot_bootstrap_coefficient()
+```
+
+Page 4
+=======================================================================
