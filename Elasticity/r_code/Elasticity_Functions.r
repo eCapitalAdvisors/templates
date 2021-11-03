@@ -10,6 +10,7 @@
 ## loading libraries
 library(tidyverse)
 library(plotly)
+library(broom)
 library(readxl)
 
 ## function for sales and price data
@@ -66,11 +67,10 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    scale_fill_discrete(guide = FALSE) +
     theme(plot.title = element_text(hjust = .5), plot.caption = element_text(hjust = .5)) +
     coord_flip()
   
-  ggplotly(p)
+  hide_legend(ggplotly(p))
   }
 
 plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
@@ -80,17 +80,17 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), legend.position = "None", plot.caption = element_text(hjust = .5)) +
+    theme(plot.title = element_text(hjust = .5), plot.caption = element_text(hjust = .5)) +
     coord_flip()
 
-  ggplotly(p)
+  hide_legend(ggplotly(p))
   }
 
 plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
   #graphing a histogram for sales
-  p <- ggplot(data = sales_tbl, aes(x = log(sales))) + 
-    geom_density(adjust = 5, aes(fill = description), alpha = .8) +
+  p <- ggplot(data = sales_tbl, aes(x = log(sales), fill = description)) + 
+    geom_density(adjust = 5, aes(x = log(sales), fill = description), alpha = .8) +
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
@@ -152,6 +152,11 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
     
     ggplotly(p) 
   }
+}
+
+get_lmfit <- function(var1, var2, data) {
+  lmfit <- lm(var1~var2, data = data)
+  augment(lmfit)
 }
 
 plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
