@@ -154,6 +154,11 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
+get_lmfit <- function(var1, var2, data) {
+  lmfit <- lm(var1~var2, data = data)
+  augment(lmfit)
+}
+
 plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
   plot(lm(var1~var2, data = sales_sample_tbl))
 }
@@ -179,10 +184,10 @@ plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 # 
-plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
-plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
+# plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
+# plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
-plot_scatter(sales_sample_tbl)
+# plot_scatter(sales_sample_tbl)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
