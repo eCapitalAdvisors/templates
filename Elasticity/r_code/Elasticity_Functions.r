@@ -150,18 +150,28 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
        are transformed on a log scale.") +
       theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
-    ggplotly(p) 
+    ggplosalestly(p) 
   }
 }
 
+
+# I am trying to develop a function for linear regressions, so far no cigar
 get_lmfit <- function(var1, var2, data) {
-  lmfit <- lm(var1~var2, data = data)
-  augment(lmfit)
+  lm(log(var1) ~ log(var2), data = data)
 }
 
-plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
-  plot(lm(var1~var2, data = sales_sample_tbl))
+plot_lm <- function(get_lmfit) {
+  ggplot(get_lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = data$description)) +
+    geom_point()
 }
+
+get_lmfit(price, sales, sales_sample_tbl)
+plot_lm(get_lmfit)
+
+lmfit <- lm(log(price) ~ log(sales), data = sales_sample_tbl)
+#augment_lmfit <- augment(lmfit)
+ggplot(lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = sales_sample_tbl$description)) +
+  geom_point()
 
 #plot_bootstrap_coefficient <- function() {
 #  plot()
@@ -188,6 +198,8 @@ plot_residuals_vs_fitted <- function(var1, var2, sales_sample_tbl) {
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
 # plot_scatter(sales_sample_tbl)
+
+get_lmfit(log(sales), log(price), sales_sample_tbl)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
