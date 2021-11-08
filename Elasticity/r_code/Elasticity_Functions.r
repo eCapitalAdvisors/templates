@@ -154,19 +154,19 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-
-# I am trying to develop a function for linear regressions, so far no cigar
 get_lmfit <- function(var1, var2, data) {
+  #linear regression
   lmfit <- lm(log(var1) ~ log(var2), data)
 }
 
 plot_lm <- function(data, get_lmfit) {
+  #plotting fitted vs residuals
   ggplot(data, aes(get_lmfit$fitted.values, get_lmfit$residuals)) +
-    geom_point()
+    geom_point() +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+    labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
+    theme(plot.title = element_text(hjust = .5))
 }
-
-get_lmfit(sales_sample_tbl$price, sales_sample_tbl$sales, sales_sample_tbl)
-plot_lm(sales_sample_tbl, lmfit)
 
 #plot_bootstrap_coefficient <- function() {
 #  plot()
@@ -193,8 +193,10 @@ plot_lm(sales_sample_tbl, lmfit)
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
 # plot_scatter(sales_sample_tbl)
-
-get_lmfit(log(sales), log(price), sales_sample_tbl)
+# 
+# get_lmfit(sales_sample_tbl$price, sales_sample_tbl$sales, sales_sample_tbl)
+# plot_lm(sales_sample_tbl, lmfit)
+# 
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
