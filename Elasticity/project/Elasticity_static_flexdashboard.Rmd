@@ -108,8 +108,7 @@ Row 1
 
 ```{r, echo = FALSE, warning = FALSE}
 #plot of residuals vs fitted
-get_lmfit(sales_sample_tbl$price, sales_sample_tbl$sales, sales_sample_tbl)
-plot_lm(sales_sample_tbl, lmfit)
+plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 ```
 
 Row 2

@@ -154,10 +154,10 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none") {
+plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
   if (model == "REM") {
-    lmfit <- glm(log(sales) ~ log(price) + description, data = sales_sample_tbl)
+    lmfit <- lm(log(sales) ~ log(price) + description, data = sales_sample_tbl)
     
     p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
       geom_point() +
@@ -169,7 +169,7 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none") {
   }
   
   else if (model == "MEM") {
-    lmfit <- glm(log(sales) ~ log(price) * description, data = sales_sample_tbl)
+    lmfit <- lm(log(sales) ~ log(price) * description, data = sales_sample_tbl)
     
     p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
       geom_point() +
@@ -181,10 +181,10 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none") {
   }
 }
 
-#DO IT
-#plot_bootstrap_coefficient <- function() {
-#  plot()
-#}
+for (i in 1:1000) {
+  #creating a resampled dataset from the sample data
+  #sample = idk
+}
 
 # # Testing Functions ----
 # ## setting file paths
