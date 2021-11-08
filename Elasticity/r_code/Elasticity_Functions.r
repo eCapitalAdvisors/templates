@@ -154,20 +154,34 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-get_lmfit <- function(var1, var2, data) {
-  #linear regression
-  lmfit <- lm(log(var1) ~ log(var2), data)
+plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none") {
+  
+  if (model == "REM") {
+    lmfit <- glm(log(sales) ~ log(price) + description, data = sales_sample_tbl)
+    
+    p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
+      theme(plot.title = element_text(hjust = .5))
+    
+    ggplotly(p)
+  }
+  
+  else if (model == "MEM") {
+    lmfit <- glm(log(sales) ~ log(price) * description, data = sales_sample_tbl)
+    
+    p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
+      theme(plot.title = element_text(hjust = .5))
+    
+    ggplotly(p)
+  }
 }
 
-plot_lm <- function(data, get_lmfit) {
-  #plotting fitted vs residuals
-  ggplot(data, aes(get_lmfit$fitted.values, get_lmfit$residuals)) +
-    geom_point() +
-    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-    labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
-    theme(plot.title = element_text(hjust = .5))
-}
-
+#DO IT
 #plot_bootstrap_coefficient <- function() {
 #  plot()
 #}
@@ -194,9 +208,8 @@ plot_lm <- function(data, get_lmfit) {
 # 
 # plot_scatter(sales_sample_tbl)
 # 
-# get_lmfit(sales_sample_tbl$price, sales_sample_tbl$sales, sales_sample_tbl)
-# plot_lm(sales_sample_tbl, lmfit)
-# 
+# plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
+# plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
