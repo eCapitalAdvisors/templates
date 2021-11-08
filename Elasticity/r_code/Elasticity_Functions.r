@@ -157,21 +157,16 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
 
 # I am trying to develop a function for linear regressions, so far no cigar
 get_lmfit <- function(var1, var2, data) {
-  lm(log(var1) ~ log(var2), data = data)
+  lmfit <- lm(log(var1) ~ log(var2), data)
 }
 
-plot_lm <- function(get_lmfit) {
-  ggplot(get_lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = data$description)) +
+plot_lm <- function(data, get_lmfit) {
+  ggplot(data, aes(get_lmfit$fitted.values, get_lmfit$residuals)) +
     geom_point()
 }
 
-get_lmfit(price, sales, sales_sample_tbl)
-plot_lm(get_lmfit)
-
-lmfit <- lm(log(price) ~ log(sales), data = sales_sample_tbl)
-#augment_lmfit <- augment(lmfit)
-ggplot(lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = sales_sample_tbl$description)) +
-  geom_point()
+get_lmfit(sales_sample_tbl$price, sales_sample_tbl$sales, sales_sample_tbl)
+plot_lm(sales_sample_tbl, lmfit)
 
 #plot_bootstrap_coefficient <- function() {
 #  plot()
