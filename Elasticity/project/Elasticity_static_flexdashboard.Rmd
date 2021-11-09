@@ -108,7 +108,7 @@ Row 1
 
 ```{r, echo = FALSE, warning = FALSE}
 #plot of residuals vs fitted
-plot_residuals_vs_fitted(log(sales_sample_tbl$sales), log(sales_sample_tbl$price), sales_sample_tbl)
+plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 ```
 
 Row 2

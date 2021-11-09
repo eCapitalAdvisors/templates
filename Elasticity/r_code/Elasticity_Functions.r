@@ -154,28 +154,37 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-
-# I am trying to develop a function for linear regressions, so far no cigar
-get_lmfit <- function(var1, var2, data) {
-  lm(log(var1) ~ log(var2), data = data)
+plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
+  
+  if (model == "REM") {
+    lmfit <- lm(log(sales) ~ log(price) + description, data = sales_sample_tbl)
+    
+    p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
+      theme(plot.title = element_text(hjust = .5))
+    
+    ggplotly(p)
+  }
+  
+  else if (model == "MEM") {
+    lmfit <- lm(log(sales) ~ log(price) * description, data = sales_sample_tbl)
+    
+    p <- ggplot(sales_sample_tbl, aes(lmfit$fitted.values, lmfit$residuals)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
+      theme(plot.title = element_text(hjust = .5))
+    
+    ggplotly(p)
+  }
 }
 
-plot_lm <- function(get_lmfit) {
-  ggplot(get_lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = data$description)) +
-    geom_point()
+for (i in 1:1000) {
+  #creating a resampled dataset from the sample data
+  #sample = idk
 }
-
-get_lmfit(price, sales, sales_sample_tbl)
-plot_lm(get_lmfit)
-
-lmfit <- lm(log(price) ~ log(sales), data = sales_sample_tbl)
-#augment_lmfit <- augment(lmfit)
-ggplot(lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = sales_sample_tbl$description)) +
-  geom_point()
-
-#plot_bootstrap_coefficient <- function() {
-#  plot()
-#}
 
 # # Testing Functions ----
 # ## setting file paths
@@ -198,8 +207,9 @@ ggplot(lmfit, aes(lmfit$fitted.values, lmfit$residuals, color = sales_sample_tbl
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
 # plot_scatter(sales_sample_tbl)
-
-get_lmfit(log(sales), log(price), sales_sample_tbl)
+# 
+# plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
+# plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
