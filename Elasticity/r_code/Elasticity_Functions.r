@@ -181,10 +181,21 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
   }
 }
 
+## Bootstrapping Method
+
+#Container for the coefficients
+betas <- c()
+
 for (i in 1:1000) {
-  #creating a resampled dataset from the sample data
-  #sample = idk
+  samp_b <- sample(ncol(get_sales), replace = TRUE)
+  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl)
+  betas <- rbind(betas, coef(reg_b))
 }
+
+betas[1:5, ]
+
+
+#end product will be a faceted histogram or a histogram with confidence intervals as vertical lines grouped by description
 
 # # Testing Functions ----
 # ## setting file paths
