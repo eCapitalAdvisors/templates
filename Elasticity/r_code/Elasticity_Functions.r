@@ -181,10 +181,29 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
   }
 }
 
-for (i in 1:1000) {
-  #creating a resampled dataset from the sample data
-  #sample = idk
+## Bootstrapping Method
+
+plot_bootstrap <- function(tbl) {
+    
+    #Container for the coefficients
+    betas <- c()
+    
+    for (i in 1:1000) 
+      samp_b <- sample(ncol(tbl), replace = TRUE)
+      reg_b <- glm(log(sales) ~ log(price) + description, data = tbl)
+      betas <- rbind(betas, coef(reg_b))
+    
+    p <- ggplot(, aes(betas)) + 
+      geom_density(color = tbl$description) +
+      facet_wrap(vars(description), nrow = 3) 
+      
+    ggplotly(p)
 }
+
+plot_bootstrap(sales_tbl)
+
+
+#end product will be a faceted histogram or a histogram with confidence intervals as vertical lines grouped by description
 
 # # Testing Functions ----
 # ## setting file paths
@@ -211,6 +230,8 @@ for (i in 1:1000) {
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
+# get_bootstrap(sales_tbl)
+# 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
 #                  filter(description == "CINNAMON TOAST CRUNC") %>%
@@ -230,3 +251,16 @@ for (i in 1:1000) {
 #     type = "area",
 #     name = "Wheaties"
 #   )
+
+betas <- c()
+
+for (i in 1:1000) {
+  samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
+  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
+  betas <- rbind(betas, coef(reg_b))
+}
+
+as_tibble(betas) %>%
+  select(`log(price)`) %>%
+  ggplot(aes(x = `log(price)`)) +
+  geom_density()
