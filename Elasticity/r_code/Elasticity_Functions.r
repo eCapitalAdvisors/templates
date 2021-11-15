@@ -183,24 +183,39 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 
 ## Bootstrapping Method
 
-plot_bootstrap <- function(tbl) {
-    
-    #Container for the coefficients
-    betas <- c()
-    
-    for (i in 1:1000) 
-      samp_b <- sample(ncol(tbl), replace = TRUE)
-      reg_b <- glm(log(sales) ~ log(price) + description, data = tbl)
-      betas <- rbind(betas, coef(reg_b))
-    
-    p <- ggplot(, aes(betas)) + 
-      geom_density(color = tbl$description) +
-      facet_wrap(vars(description), nrow = 3) 
-      
-    ggplotly(p)
+# (2) make it a function !!
+# obtain betas for bootstrap
+betas <- c()
+s <- sd(samp_b)
+eb <- c()
+
+for (i in 1:1000) {
+  samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
+  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
+  betas <- rbind(betas, coef(reg_b))
+  eb <- c(eb, samp_b - s)
 }
 
-plot_bootstrap(sales_tbl)
+# mean of errors
+mean(eb)
+
+# difference between full sample and bootstrap errors
+mean(s - eb)
+
+# full sample standard deviation
+sd(betas)
+
+# 90% confidence interval for sigma
+tvals <- quantile(eb, c(0.05, 0.95), na.rm = TRUE)
+s - tvals[2:1]
+
+as_tibble(betas) %>%
+  select(`log(price)`) %>%
+  ggplot(aes(x = `log(price)`)) +
+  geom_density() +
+  geom_vline(xintercept = c(s - tvals[2:1]), linetype = "dotted", color = "red")
+
+
 
 
 #end product will be a faceted histogram or a histogram with confidence intervals as vertical lines grouped by description
@@ -251,16 +266,3 @@ plot_bootstrap(sales_tbl)
 #     type = "area",
 #     name = "Wheaties"
 #   )
-
-betas <- c()
-
-for (i in 1:1000) {
-  samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
-  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
-  betas <- rbind(betas, coef(reg_b))
-}
-
-as_tibble(betas) %>%
-  select(`log(price)`) %>%
-  ggplot(aes(x = `log(price)`)) +
-  geom_density()
