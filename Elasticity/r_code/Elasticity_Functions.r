@@ -11,6 +11,7 @@
 library(tidyverse)
 library(plotly)
 library(broom)
+library(infer)
 library(readxl)
 
 ## function for sales and price data
@@ -184,41 +185,36 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 ## Bootstrapping Method
 
 # (2) make it a function !!
+
 # obtain betas for bootstrap
 betas <- c()
-s <- sd(samp_b)
-eb <- c()
+sum_of_betas <- 0
 
+#get rid of the "for loop"
 for (i in 1:1000) {
   samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
   reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
   betas <- rbind(betas, coef(reg_b))
-  eb <- c(eb, samp_b - s)
+  sum_of_betas <- sum_of_betas + as.numeric(coef(reg_b))
 }
 
-# mean of errors
-mean(eb)
+mean_of_betas <- as_tibble(sum_of_betas/1000) %>%
+  select(`log(price)`)
 
-# difference between full sample and bootstrap errors
-mean(s - eb)
+error_of_betas <- qnorm(0.975)*2/sqrt(1000)
 
-# full sample standard deviation
-sd(betas)
+left <- mean_of_betas - error_of_betas
+right <- mean_of_betas + error_of_betas
 
-# 90% confidence interval for sigma
-tvals <- quantile(eb, c(0.05, 0.95), na.rm = TRUE)
-s - tvals[2:1]
+access_betas <- as_tibble(betas) %>%
+  select(`log(price)`)
 
-as_tibble(betas) %>%
-  select(`log(price)`) %>%
-  ggplot(aes(x = `log(price)`)) +
+data.frame(betas)
+
+ggplot(access_betas, aes(x = `log(price)`)) +
   geom_density() +
-  geom_vline(xintercept = c(s - tvals[2:1]), linetype = "dotted", color = "red")
+  geom_vline(xintercept = c(left[[1]], right[[1]]), linetype = "dotted", color = "red")
 
-
-
-
-#end product will be a faceted histogram or a histogram with confidence intervals as vertical lines grouped by description
 
 # # Testing Functions ----
 # ## setting file paths
