@@ -188,14 +188,12 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 
 # obtain betas for bootstrap
 betas <- c()
-sum_of_betas <- 0
 
 #get rid of the "for loop"
 for (i in 1:1000) {
   samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
   reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
   betas <- rbind(betas, coef(reg_b))
-  sum_of_betas <- sum_of_betas + as.numeric(coef(reg_b))
 }
 
 mean_of_betas <- as_tibble(sum_of_betas/1000) %>%
