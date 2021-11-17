@@ -186,33 +186,44 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 
 # (2) make it a function !!
 
-# obtain betas for bootstrap
-betas <- c()
-
-#get rid of the "for loop"
-for (i in 1:1000) {
-  samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
-  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
-  betas <- rbind(betas, coef(reg_b))
+get_bootstrap <- function(sales_tbl) {
+  
+  # obtain betas for bootstrap
+  bootstrap_tbl <- sales_tbl %>%
+    mutate(sales = log(sales), price = log(price)) %>%
+    specify(formula = sales ~ price + description) %>%
+    generate(reps = 1000, type = "bootstrap") %>%
+    fit()
 }
 
-mean_of_betas <- as_tibble(sum_of_betas/1000) %>%
-  select(`log(price)`)
+# obtain confidence interval for bootstrap
 
-error_of_betas <- qnorm(0.975)*2/sqrt(1000)
+get_ci_for_bootstrap <- function(bootstrap_tbl) {
+  
+  ci <- bootstrap_tbl %>%
+    group_by(term) %>%
+    nest() %>%
+    mutate(perc_ci = map(
+      data,
+      get_confidence_interval,
+      level = 0.95,
+      type = "percentile")) %>%
+    unnest(perc_ci)
+  
+}
 
-left <- mean_of_betas - error_of_betas
-right <- mean_of_betas + error_of_betas
+get_ci_for_bootstrap(bootstrap_tbl)
 
-access_betas <- as_tibble(betas) %>%
-  select(`log(price)`)
+# plot the bootstrap
+plot_bootstrap <- function(bootstrap_tbl) {
+  p <- ggplot(bootstrap_tbl, aes(estimate)) +
+    geom_density() +
+    facet_wrap(~ term, scales = "free")
+  
+  ggplotly(p)
+}
 
-data.frame(betas)
-
-ggplot(access_betas, aes(x = `log(price)`)) +
-  geom_density() +
-  geom_vline(xintercept = c(left[[1]], right[[1]]), linetype = "dotted", color = "red")
-
+plot_bootstrap(bootstrap_tbl)
 
 # # Testing Functions ----
 # ## setting file paths

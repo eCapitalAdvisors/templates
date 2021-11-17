@@ -25,5 +25,3 @@ bootstrap_tbl %>%
 
 visualise()
 shade_confidence_interval()
-
-get_confidence_interval()
