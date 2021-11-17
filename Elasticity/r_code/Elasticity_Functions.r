@@ -213,14 +213,13 @@ get_ci_for_bootstrap <- function(bootstrap_tbl) {
   
 }
 
-get_bootstrap(sales_tbl)
-get_ci_for_bootstrap(bootstrap_tbl)
-
 # plot the bootstrap
+
 plot_bootstrap <- function(bootstrap_tbl) {
-  p <- ggplot(bootstrap_tbl, aes(estimate)) +
-    geom_density() +
-    facet_wrap(~ term, scales = "free")
+  p <- ggplot(bootstrap_tbl %>% filter(term == "price") %>% select(replicate, estimate), aes(estimate)) +
+    geom_density() + 
+    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(upper_ci), linetype = "dotted", color = "red")
   
   ggplotly(p)
 }
@@ -252,7 +251,8 @@ plot_bootstrap(bootstrap_tbl)
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
-# get_bootstrap(sales_tbl)
+# bootstrap_tbl <- get_bootstrap(sales_tbl)
+# ci <- get_ci_for_bootstrap(bootstrap_tbl)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
