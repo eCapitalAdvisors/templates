@@ -21,7 +21,3 @@ bootstrap_tbl %>%
    type = "percentile"
   )) %>%
   unnest(perc_ci)
-
-
-visualise()
-shade_confidence_interval()

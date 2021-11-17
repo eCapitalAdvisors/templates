@@ -196,8 +196,8 @@ get_bootstrap <- function(sales_tbl) {
     fit()
 }
 
-# obtain confidence interval for bootstrap
 
+# obtain confidence interval for bootstrap
 get_ci_for_bootstrap <- function(bootstrap_tbl) {
   
   ci <- bootstrap_tbl %>%
@@ -207,11 +207,13 @@ get_ci_for_bootstrap <- function(bootstrap_tbl) {
       data,
       get_confidence_interval,
       level = 0.95,
-      type = "percentile")) %>%
+      type = "percentile"
+    )) %>%
     unnest(perc_ci)
   
 }
 
+get_bootstrap(sales_tbl)
 get_ci_for_bootstrap(bootstrap_tbl)
 
 # plot the bootstrap
