@@ -11,6 +11,7 @@
 library(tidyverse)
 library(plotly)
 library(broom)
+library(infer)
 library(readxl)
 
 ## function for sales and price data
@@ -184,41 +185,46 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 ## Bootstrapping Method
 
 # (2) make it a function !!
-# obtain betas for bootstrap
-betas <- c()
-s <- sd(samp_b)
-eb <- c()
 
-for (i in 1:1000) {
-  samp_b <- sample.int(nrow(sales_tbl), replace = TRUE)
-  reg_b <- glm(log(sales) ~ log(price) + description, data = sales_tbl[samp_b,])
-  betas <- rbind(betas, coef(reg_b))
-  eb <- c(eb, samp_b - s)
+get_bootstrap <- function(sales_tbl) {
+  
+  # obtain betas for bootstrap
+  bootstrap_tbl <- sales_tbl %>%
+    mutate(sales = log(sales), price = log(price)) %>%
+    specify(formula = sales ~ price + description) %>%
+    generate(reps = 1000, type = "bootstrap") %>%
+    fit()
 }
 
-# mean of errors
-mean(eb)
 
-# difference between full sample and bootstrap errors
-mean(s - eb)
+# obtain confidence interval for bootstrap
+get_ci_for_bootstrap <- function(bootstrap_tbl) {
+  
+  ci <- bootstrap_tbl %>%
+    group_by(term) %>%
+    nest() %>%
+    mutate(perc_ci = map(
+      data,
+      get_confidence_interval,
+      level = 0.95,
+      type = "percentile"
+    )) %>%
+    unnest(perc_ci)
+  
+}
 
-# full sample standard deviation
-sd(betas)
+# plot the bootstrap
 
-# 90% confidence interval for sigma
-tvals <- quantile(eb, c(0.05, 0.95), na.rm = TRUE)
-s - tvals[2:1]
+plot_bootstrap <- function(bootstrap_tbl) {
+  p <- ggplot(bootstrap_tbl %>% filter(term == "price") %>% select(replicate, estimate), aes(estimate)) +
+    geom_density() + 
+    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(upper_ci), linetype = "dotted", color = "red")
+  
+  ggplotly(p)
+}
 
-as_tibble(betas) %>%
-  select(`log(price)`) %>%
-  ggplot(aes(x = `log(price)`)) +
-  geom_density() +
-  geom_vline(xintercept = c(s - tvals[2:1]), linetype = "dotted", color = "red")
-
-
-
-
-#end product will be a faceted histogram or a histogram with confidence intervals as vertical lines grouped by description
+plot_bootstrap(bootstrap_tbl)
 
 # # Testing Functions ----
 # ## setting file paths
@@ -245,7 +251,8 @@ as_tibble(betas) %>%
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
-# get_bootstrap(sales_tbl)
+# bootstrap_tbl <- get_bootstrap(sales_tbl)
+# ci <- get_ci_for_bootstrap(bootstrap_tbl)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
