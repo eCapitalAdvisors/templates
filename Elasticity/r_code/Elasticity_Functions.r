@@ -20,7 +20,9 @@ input_descriptions <- function(descriptions_path) {
   # importing file
   descriptions_tbl <- read_excel(descriptions_path) %>%
     select(UPC, DESCRIP) %>%
-    rename(description = DESCRIP)
+    rename(description = DESCRIP) %>%
+    mutate(description = recode(description, "CINNAMON TOAST CRUNC" = "Cinnamon Toast Crunch", "KIX" = "Kix", "WHEATIES" = "Wheaties"))
+  
 }  
 
 input_prices <- function(prices_path) {
@@ -184,8 +186,6 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
 
 ## Bootstrapping Method
 
-# (2) make it a function !!
-
 get_bootstrap <- function(sales_tbl) {
   
   # obtain betas for bootstrap
@@ -194,6 +194,8 @@ get_bootstrap <- function(sales_tbl) {
     specify(formula = sales ~ price + description) %>%
     generate(reps = 1000, type = "bootstrap") %>%
     fit()
+  
+  saveRDS(object = bootstrap_tbl, file = "bootstrap_tbl.rds")
 }
 
 
@@ -252,9 +254,11 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
-# bootstrap_tbl <- get_bootstrap(sales_tbl)
-# ci <- get_ci_for_bootstrap(bootstrap_tbl)
-# plot_bootstrap(bootstrap_tbl)
+bootstrap_tbl <- get_bootstrap(sales_tbl)
+bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
+#
+# ci <- get_ci_for_bootstrap(bootstrap_tbl2)
+# plot_bootstrap(bootstrap_tbl2)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%

@@ -119,9 +119,10 @@ Row 2
 ```{r, echo = FALSE, warning = FALSE}
 
 bootstrap_tbl <- get_bootstrap(sales_tbl)
-ci <- get_ci_for_bootstrap(bootstrap_tbl)
+bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
+ci <- get_ci_for_bootstrap(bootstrap_tbl2)
 
 ##plot of bootstrap coefficient
-plot_bootstrap(bootstrap_tbl)
+plot_bootstrap(bootstrap_tbl2)
 ```
 
