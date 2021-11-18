@@ -21,7 +21,7 @@ input_descriptions <- function(descriptions_path) {
   descriptions_tbl <- read_excel(descriptions_path) %>%
     select(UPC, DESCRIP) %>%
     rename(description = DESCRIP) %>%
-    mutate(description = recode(description, "CINNAMON TOAST CRUNC" = "Cinnamon Toast Crunch", "KIX" = "Kix", "WHEATIES" = "Wheaties"))
+    mutate(description = recode(description, `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch", `KIX` = "Kix", `WHEATIES` = "Wheaties"))
   
 }  
 
@@ -69,7 +69,6 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
   p <- ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
-    scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
     theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
   
@@ -82,7 +81,6 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
   p <- ggplot(data = sales_tbl, aes(x = description, y = log(price), color = description)) +
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
-    scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
     theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
 
@@ -95,7 +93,7 @@ plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   p <- ggplot(data = sales_tbl, aes(x = log(sales), fill = description)) + 
     geom_density(adjust = 5, aes(x = log(sales), fill = description), alpha = .8) +
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
-    scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
+    scale_fill_discrete(name = "Brand Names") + 
     theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
 
   ggplotly(p)
@@ -108,7 +106,7 @@ plot_histogram_price <- function(sales_tbl, x_title, title_chart){
     geom_density(adjust = 5, aes(fill = description), alpha = .8) +
     xlim(0, 2) + 
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
-    scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
+    scale_fill_discrete(name = "Brand Names") + 
     theme(plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
 
   ggplotly(p)
@@ -124,7 +122,7 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       geom_line(aes(y = pred, color = description), size = 1) + 
       xlim(0, 1.75) +
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
-           title = "Price vs. Box Sales", caption = "The x and y values
+           title = "Price vs. Box Sales", fill = "Brand Names", caption = "The x and y values
        are transformed on a log scale.") +
       theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
@@ -138,7 +136,7 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       geom_line(aes(y = pred, color = description), size = 1) + 
       xlim(0, 1.75) +
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
-           title = "Price vs. Box Sales", caption = "The x and y values
+           title = "Price vs. Box Sales", fill = "Brand Names", caption = "The x and y values
        are transformed on a log scale.") +
       theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
@@ -149,7 +147,7 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       geom_point(aes(color = description), alpha = .8) +
       xlim(0, 1.75) +
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
-           title = "Price vs. Box Sales", caption = "The x and y values
+           title = "Price vs. Box Sales", fill = "Brand Names", caption = "The x and y values
        are transformed on a log scale.") +
       theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
@@ -254,8 +252,8 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
-bootstrap_tbl <- get_bootstrap(sales_tbl)
-bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
+# bootstrap_tbl <- get_bootstrap(sales_tbl)
+# bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
 #
 # ci <- get_ci_for_bootstrap(bootstrap_tbl2)
 # plot_bootstrap(bootstrap_tbl2)

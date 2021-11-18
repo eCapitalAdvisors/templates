@@ -27,6 +27,7 @@ prices_path <- "../data/raw_data_cereal_prices.xlsx"
 descriptions_tbl <- input_descriptions(descriptions_path)
 prices_tbl <- input_prices(prices_path)
 ```
+
 ```{r, include = FALSE}
 #obtaining our data tables
 top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
@@ -117,12 +118,10 @@ Row 2
 ### Bootstrap Coefficient
 
 ```{r, echo = FALSE, warning = FALSE}
-
-bootstrap_tbl <- get_bootstrap(sales_tbl)
-bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
-ci <- get_ci_for_bootstrap(bootstrap_tbl2)
+bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
+ci <- get_ci_for_bootstrap(bootstrap_tbl)
 
 ##plot of bootstrap coefficient
-plot_bootstrap(bootstrap_tbl2)
+plot_bootstrap(bootstrap_tbl)
 ```
 
