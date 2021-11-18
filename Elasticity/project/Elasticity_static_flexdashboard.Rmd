@@ -117,7 +117,11 @@ Row 2
 ### Bootstrap Coefficient
 
 ```{r, echo = FALSE, warning = FALSE}
+
+bootstrap_tbl <- get_bootstrap(sales_tbl)
+ci <- get_ci_for_bootstrap(bootstrap_tbl)
+
 ##plot of bootstrap coefficient
-#plot_bootstrap_coefficient()
+plot_bootstrap(bootstrap_tbl)
 ```
 

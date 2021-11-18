@@ -68,7 +68,7 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), plot.caption = element_text(hjust = .5)) +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
   
   hide_legend(ggplotly(p))
@@ -81,7 +81,7 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     geom_boxplot() +
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     scale_x_discrete(labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) +
-    theme(plot.title = element_text(hjust = .5), plot.caption = element_text(hjust = .5)) +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
 
   hide_legend(ggplotly(p))
@@ -107,7 +107,7 @@ plot_histogram_price <- function(sales_tbl, x_title, title_chart){
     xlim(0, 2) + 
     labs(x = x_title, y = "Density", title = title_chart, caption = "The x-values are transformed on a log scale.") +
     scale_fill_discrete(name = "Brand Names", labels = c("Cinnamon Toast Crunch", "KIX", "Wheaties")) + 
-    theme(plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+    theme(plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
 
   ggplotly(p)
   }
@@ -124,7 +124,7 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
            title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.") +
-      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+      theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
     ggplotly(p) 
   }
@@ -138,7 +138,7 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
            title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.") +
-      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+      theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
     ggplotly(p)
   }
@@ -149,9 +149,9 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
       labs(x = "Price of Cereal Box", y = "Number of Cereal Boxes Sold",
            title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.") +
-      theme(legend.position = "None", plot.title = element_text(hjust = .5), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+      theme(legend.position = "None", plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
     
-    ggplosalestly(p) 
+    ggplotly(p) 
   }
 }
 
@@ -164,7 +164,7 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
       geom_point() +
       geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
       labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
-      theme(plot.title = element_text(hjust = .5))
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
     
     ggplotly(p)
   }
@@ -176,7 +176,7 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
       geom_point() +
       geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
       labs(title = "Fitted vs Residuals", x = "Residuals", y = "Fitted Values") +
-      theme(plot.title = element_text(hjust = .5))
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
     
     ggplotly(p)
   }
@@ -219,12 +219,13 @@ plot_bootstrap <- function(bootstrap_tbl) {
   p <- ggplot(bootstrap_tbl %>% filter(term == "price") %>% select(replicate, estimate), aes(estimate)) +
     geom_density() + 
     geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(lower_ci), linetype = "dotted", color = "red") +
-    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(upper_ci), linetype = "dotted", color = "red")
+    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+    labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+    theme(plot.title = element_text(hjust = .5, face = "bold"))
   
   ggplotly(p)
 }
 
-plot_bootstrap(bootstrap_tbl)
 
 # # Testing Functions ----
 # ## setting file paths
@@ -253,6 +254,7 @@ plot_bootstrap(bootstrap_tbl)
 # 
 # bootstrap_tbl <- get_bootstrap(sales_tbl)
 # ci <- get_ci_for_bootstrap(bootstrap_tbl)
+# plot_bootstrap(bootstrap_tbl)
 # 
 # # Testing Function pt. 2 ----
 # hchart(density((sales_tbl %>%
