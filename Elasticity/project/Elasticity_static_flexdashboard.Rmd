@@ -1,18 +1,12 @@
 ---
 title: "Static Elasticity Flexdashboard"
 author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
-date: "10/25/2021"
+date: "11/19/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
-    theme: simplex
 ---
-
-```{r, include=FALSE}
-#sourcing my code from 'Elasticity_Functions.r'
-source("../r_code/Elasticity_Functions.r", local = knitr::knit_global())
-```
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
@@ -20,18 +14,28 @@ library(tidyverse)
 library(readxl)
 library(ggplot2)
 
+#sourcing my code
+source("../R/cleaning_data_functions.R")
+
 #importing data
 descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
 prices_path <- "../data/raw_data_cereal_prices.xlsx"
 
-descriptions_tbl <- input_descriptions(descriptions_path)
-prices_tbl <- input_prices(prices_path)
+descriptions_tbl <- readRDS(file = "descriptions_tbl.rds")
+prices_tbl <- readRDS(file = "prices_tbl.rds")
 ```
 
 ```{r, include = FALSE}
+source("../R/cleaning_data_functions.R")
+
 #obtaining our data tables
-top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
-sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
+```
+
+```{r, include = FALSE}
+source("../R/cleaned_data_function.R")
+#obtaining our data tables
+sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- get_sales_sample(sales_tbl)
 ```
 
@@ -44,6 +48,7 @@ Row 1 {.tabset}
 ### Box Plot of Sales by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
+source("../R/boxplot_function.R")
 #box plot of sales by brand
 plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 ```
@@ -51,6 +56,7 @@ plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribut
 ### Box Plot of Prices by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
+source("../R/boxplot_function.R")
 #box plot of prices by brand
 plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 ```
@@ -61,6 +67,7 @@ Row 2 {.tabset}
 ### Histogram of Sales
 
 ```{r, echo = FALSE, warning = FALSE}
+source("../R/histogram_function.R")
 #histogram for sales
 plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 ```
@@ -68,6 +75,7 @@ plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales"
 ### Histogram of Price
 
 ```{r, echo = FALSE, warning = FALSE}
+source("../R/histogram_function.R")
 #histogram for price
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
@@ -81,6 +89,7 @@ Row 1 {.tabset}
 ### Scatter Plot for Sales vs. Price
 
 ```{r static_plot, echo = FALSE, warning = FALSE}
+source("../R/scatterplot_function.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl)
 ```
@@ -88,6 +97,7 @@ plot_scatter(sales_sample_tbl)
 ### Random Intercepts
 
 ```{r static_plot_2, echo = FALSE, warning = FALSE}
+source("../R/scatterplot_function.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl, model = "RI")
 ```
@@ -95,6 +105,7 @@ plot_scatter(sales_sample_tbl, model = "RI")
 ### Random Intercepts Random Slopes
 
 ```{r static_plot_3, echo = FALSE, warning = FALSE}
+source("../R/scatterplot_function.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl, model = "RIRS")
 ```
@@ -108,6 +119,7 @@ Row 1
 ### Residuals vs Fitted
 
 ```{r, echo = FALSE, warning = FALSE}
+source("../R/fitted_vs_residual_function.R")
 #plot of residuals vs fitted
 plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 ```
@@ -119,9 +131,16 @@ Row 2
 
 ```{r, echo = FALSE, warning = FALSE}
 bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
+
+source("../R/bootstrap_means_data_function.R")
 ci <- get_ci_for_bootstrap(bootstrap_tbl)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+source("../R/bootstrap_plot_function.R")
 
 ##plot of bootstrap coefficient
 plot_bootstrap(bootstrap_tbl)
 ```
+
 

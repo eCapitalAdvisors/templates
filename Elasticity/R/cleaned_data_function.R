@@ -7,6 +7,8 @@ get_sales <- function(descriptions_tbl, prices_tbl, top_three_brands_tbl) {
     inner_join(descriptions_tbl) %>%
     inner_join(top_three_brands_tbl) %>%
     select(sales, price, description)
+  
+  saveRDS(object = sales_tbl, file = "sales_tbl.rds")
 }
 
 get_sales_sample <- function(sales_tbl){
@@ -15,4 +17,6 @@ get_sales_sample <- function(sales_tbl){
   sales_sample_tbl <- sales_tbl %>%
     group_by(description) %>%
     sample_n(1000)
+  
+  saveRDS(object = sales_sample_tbl, file = "sales_sample_tbl.rds")
 }

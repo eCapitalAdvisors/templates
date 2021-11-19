@@ -9,6 +9,7 @@ input_descriptions <- function(descriptions_path) {
     rename(description = DESCRIP) %>%
     mutate(description = recode(description, `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch", `KIX` = "Kix", `WHEATIES` = "Wheaties"))
   
+  saveRDS(object = descriptions_tbl, file = "descriptions_tbl.rds")
 }  
 
 input_prices <- function(prices_path) {
@@ -19,6 +20,8 @@ input_prices <- function(prices_path) {
     filter(PRICE > 0) %>%
     filter(MOVE > 0) %>%
     rename(sales = MOVE, price = PRICE)
+  
+  saveRDS(object = prices_tbl, file = "prices_tbl.rds")
 }
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
@@ -30,4 +33,6 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
     summarize(total_count = n()) %>%
     filter(total_count > 1000) %>%
     slice_max(total_count, n = 3)
+  
+  saveRDS(object = top_three_brands_tbl, file = "top_three_brands_tbl.rds")
 }
