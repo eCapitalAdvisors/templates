@@ -11,11 +11,12 @@ output:
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
+library(plotly)
 library(readxl)
 library(ggplot2)
 
 #sourcing my code
-source("../R/cleaning_data_functions.R")
+source("../R/cleaning_data.R")
 
 #importing data
 descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
@@ -26,14 +27,14 @@ prices_tbl <- readRDS(file = "prices_tbl.rds")
 ```
 
 ```{r, include = FALSE}
-source("../R/cleaning_data_functions.R")
+source("../R/cleaning_data.R")
 
 #obtaining our data tables
 top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 ```
 
 ```{r, include = FALSE}
-source("../R/cleaned_data_function.R")
+source("../R/cleaned_data.R")
 #obtaining our data tables
 sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
@@ -48,7 +49,7 @@ Row 1 {.tabset}
 ### Box Plot of Sales by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/boxplot_function.R")
+source("../R/plot_boxplot.R")
 #box plot of sales by brand
 plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 ```
@@ -56,7 +57,7 @@ plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribut
 ### Box Plot of Prices by Brand
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/boxplot_function.R")
+source("../R/plot_boxplot.R")
 #box plot of prices by brand
 plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 ```
@@ -67,7 +68,7 @@ Row 2 {.tabset}
 ### Histogram of Sales
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/histogram_function.R")
+source("../R/plot_histogram.R")
 #histogram for sales
 plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 ```
@@ -75,7 +76,7 @@ plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales"
 ### Histogram of Price
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/histogram_function.R")
+source("../R/plot_histogram.R")
 #histogram for price
 plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 ```
@@ -89,7 +90,7 @@ Row 1 {.tabset}
 ### Scatter Plot for Sales vs. Price
 
 ```{r static_plot, echo = FALSE, warning = FALSE}
-source("../R/scatterplot_function.R")
+source("../R/plot_scatter.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl)
 ```
@@ -97,7 +98,7 @@ plot_scatter(sales_sample_tbl)
 ### Random Intercepts
 
 ```{r static_plot_2, echo = FALSE, warning = FALSE}
-source("../R/scatterplot_function.R")
+source("../R/plot_scatter.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl, model = "RI")
 ```
@@ -105,7 +106,7 @@ plot_scatter(sales_sample_tbl, model = "RI")
 ### Random Intercepts Random Slopes
 
 ```{r static_plot_3, echo = FALSE, warning = FALSE}
-source("../R/scatterplot_function.R")
+source("../R/plot_scatter.R")
 #scatter plot for quantity vs price
 plot_scatter(sales_sample_tbl, model = "RIRS")
 ```
@@ -119,7 +120,7 @@ Row 1
 ### Residuals vs Fitted
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/fitted_vs_residual_function.R")
+source("../R/plot_fitted_vs_residual.R")
 #plot of residuals vs fitted
 plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 ```
@@ -130,14 +131,14 @@ Row 2
 ### Bootstrap Coefficient
 
 ```{r, echo = FALSE, warning = FALSE}
-bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
+source("../R/get_bootstrap_and_ci.R")
 
-source("../R/bootstrap_means_data_function.R")
+bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
 ci <- readRDS(file = "ci.rds")
 ```
 
 ```{r, echo = FALSE, warning = FALSE}
-source("../R/bootstrap_plot_function.R")
+source("../R/plot_bootstrap.R")
 
 ##plot of bootstrap coefficient
 plot_bootstrap(bootstrap_tbl)
