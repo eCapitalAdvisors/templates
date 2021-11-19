@@ -252,7 +252,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
 # 
-# bootstrap_tbl <- get_bootstrap(sales_tbl)
+bootstrap_tbl <- get_bootstrap(sales_tbl)
 # bootstrap_tbl2 <- readRDS(file = "bootstrap_tbl.rds")
 #
 # ci <- get_ci_for_bootstrap(bootstrap_tbl2)
