@@ -1,10 +1,4 @@
-CustomerChurn/credentials/settings.py
-CustomerChurn/credentials/.env
+Elasticity_static_flexdashboard.html
 .Rproj.user
-.RData
+*.rds
 *.xlsx
-.Rhistory
-*.Rproj
-*.html
-*.pdf
-*.csv
