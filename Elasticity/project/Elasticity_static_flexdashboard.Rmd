@@ -36,7 +36,7 @@ top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 source("../R/cleaned_data_function.R")
 #obtaining our data tables
 sales_tbl <- readRDS(file = "sales_tbl.rds")
-sales_sample_tbl <- get_sales_sample(sales_tbl)
+sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
 ```
 
 Page 1
@@ -133,7 +133,7 @@ Row 2
 bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
 
 source("../R/bootstrap_means_data_function.R")
-ci <- get_ci_for_bootstrap(bootstrap_tbl)
+ci <- readRDS(file = "ci.rds")
 ```
 
 ```{r, echo = FALSE, warning = FALSE}

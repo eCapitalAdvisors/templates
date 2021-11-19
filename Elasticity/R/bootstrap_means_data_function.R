@@ -26,4 +26,5 @@ get_ci_for_bootstrap <- function(bootstrap_tbl) {
     )) %>%
     unnest(perc_ci)
   
+  saveRDS(object = ci, file = "ci.rds")
 }
