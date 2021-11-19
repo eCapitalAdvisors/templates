@@ -8,3 +8,4 @@ CustomerChurn/credentials/.env
 *.html
 *.pdf
 *.csv
+*.rds
