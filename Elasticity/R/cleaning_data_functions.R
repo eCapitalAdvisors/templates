@@ -1,4 +1,4 @@
-#Cleaning the data
+# Cleaning the data
 
 ## function for sales and price data
 input_descriptions <- function(descriptions_path) {
