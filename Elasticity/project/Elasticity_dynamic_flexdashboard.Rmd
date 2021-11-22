@@ -6,33 +6,60 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(shiny)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(readxl)
+
+#sourcing my code
+source("../R/cleaning_data.R")
+
+#importing data
+descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
+prices_path <- "../data/raw_data_cereal_prices.xlsx"
+
+descriptions_tbl <- readRDS(file = "descriptions_tbl.rds")
+prices_tbl <- readRDS(file = "prices_tbl.rds")
 ```
 
-Column {data-width=650}
------------------------------------------------------------------------
+```{r, include = FALSE}
+source("../R/cleaning_data.R")
 
-### Chart A
-
-```{r}
-
+#obtaining our data tables
+top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Chart B
-
-```{r}
-
+```{r, include = FALSE}
+source("../R/cleaned_data.R")
+#obtaining our data tables
+sales_tbl <- readRDS(file = "sales_tbl.rds")
+sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
 ```
 
-### Chart C
 
-```{r}
+Sidebar {.sidebar}
+----------------------------------------------
 
+``` {r}
+ui <- fluidPage(
+  actionButton("reset", "Clear"),
+  hr()
+)
+
+server <- function(input, output){
+  v <- reactiveValues(data = NULL)
+  
+  observeEvent(input$reset, {
+    v$data <- NULL
+  })
+}
+
+shinyApp(ui, server)
 ```
 
