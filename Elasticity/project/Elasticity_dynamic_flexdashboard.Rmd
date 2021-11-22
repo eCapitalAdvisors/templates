@@ -10,6 +10,7 @@ output:
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
+library(shiny)
 ```
 
 Column {data-width=650}
