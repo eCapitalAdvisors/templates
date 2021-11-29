@@ -4,19 +4,25 @@ author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
 date: "11/19/2021"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    orientation: columns
     vertical_layout: fill
 runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+#Shiny
 library(flexdashboard)
 library(shiny)
+library(DT)
+
+#Core
 library(tidyverse)
 library(ggplot2)
 library(plotly)
 library(readxl)
+```
 
+```{r}
 #sourcing my code
 source("../R/cleaning_data.R")
 
@@ -37,29 +43,108 @@ top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 
 ```{r, include = FALSE}
 source("../R/cleaned_data.R")
+
 #obtaining our data tables
 sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
 ```
 
+```{r, include = FALSE}
+#source code to plot the boxplot
+source("../R/plot_boxplot.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the histogram
+source("../R/plot_histogram.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the scatter plot
+source("../R/plot_scatter.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the fitted vs residual
+source("../R/plot_fitted_vs_residual.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the bootstrap
+source("../R/plot_bootstrap.R")
+```
+
+```{r, include = FALSE}
+#source code to obtain a bootstrap and CI
+source("../R/get_bootstrap_and_ci.R")
+
+bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
+ci <- readRDS(file = "ci.rds")
+```
 
 Sidebar {.sidebar}
 ----------------------------------------------
 
 ``` {r}
-ui <- fluidPage(
-  actionButton("reset", "Clear"),
-  hr()
-)
-
-server <- function(input, output){
-  v <- reactiveValues(data = NULL)
-  
-  observeEvent(input$reset, {
-    v$data <- NULL
-  })
-}
-
-shinyApp(ui, server)
+#Inputs
+checkboxGroupInput(inputId = "checkbox_group",
+                   label = h4("Checkbox Group"),
+                   choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
 ```
+
+```{r}
+# Reset Button
+actionButton(inputId = "reset",
+             label = "Reset",
+             icon = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
+  
+  updateCheckboxGroupInput(session = session,
+                           inputId = "checkbox_group",
+                           selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+})
+```
+
+(you can delete this column later)
+
+Column {data-width = 500}
+----------------------------------------------
+
+### Section - Checkbox Output
+
+```{r}
+output$checkbox_values <- renderPrint(input$checkbox_groups)
+
+textOutput(outputId = "checkbox_values")
+```
+
+
+Column {data-width = 750}
+----------------------------------------------
+
+```{r}
+# Reactive Filter
+sales_tbl_filtered <- reactive({
+  sales_tbl %>%
+    filter(description %in% input$checkbox_group)
+})
+```
+
+### Section - Reactive Output
+
+```{r}
+# renderTable(sales_tbl_filtered())
+output$dt_output_1 <- DT::renderDataTable(expr = {
+  sales_tbl_filtered() %>%
+    mutate(price = scales::dollar(price))
+}, options = list(scrollY = "250px"))
+
+DTOutput(outputId = "dt_output_1")
+```
+
+
+
+
 
