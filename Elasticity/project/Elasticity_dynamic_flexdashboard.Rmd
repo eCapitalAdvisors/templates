@@ -4,19 +4,25 @@ author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
 date: "11/19/2021"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    orientation: columns
     vertical_layout: fill
 runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+#Shiny
 library(flexdashboard)
 library(shiny)
+library(DT)
+
+#Core
 library(tidyverse)
 library(ggplot2)
 library(plotly)
 library(readxl)
+```
 
+```{r}
 #sourcing my code
 source("../R/cleaning_data.R")
 
@@ -37,6 +43,7 @@ top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 
 ```{r, include = FALSE}
 source("../R/cleaned_data.R")
+
 #obtaining our data tables
 sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
@@ -47,19 +54,24 @@ Sidebar {.sidebar}
 ----------------------------------------------
 
 ``` {r}
-ui <- fluidPage(
-  actionButton("reset", "Clear"),
-  hr()
-)
+#Inputs
+checkboxGroupInput(inputId = "checkbox_group",
+                   label = h4("Checkbox Group"),
+                   choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+```
 
-server <- function(input, output){
-  v <- reactiveValues(data = NULL)
+```{r}
+# Reset Button
+actionButton(inputId = "reset",
+             label = "Reset",
+             icon = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
   
-  observeEvent(input$reset, {
-    v$data <- NULL
-  })
-}
-
-shinyApp(ui, server)
+  updateCheckboxGroupInput(session = session,
+                           inputId = "checkbox_group",
+                           selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+})
 ```
 
