@@ -75,3 +75,44 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 })
 ```
 
+(you can delete this column later)
+
+Column {data-width = 500}
+----------------------------------------------
+
+### Section - Checkbox Output
+
+```{r}
+output$checkbox_values <- renderPrint(input$checkbox_groups)
+
+textOutput(outputId = "checkbox_values")
+```
+
+
+Column {data-width = 750}
+----------------------------------------------
+
+```{r}
+# Reactive Filter
+sales_tbl_filtered <- reactive({
+  sales_tbl %>%
+    filter(description %in% input$checkbox_group)
+})
+```
+
+### Section - Reactive Output
+
+```{r}
+# renderTable(sales_tbl_filtered())
+output$dt_output_1 <- DT::renderDataTable(expr = {
+  sales_tbl_filtered() %>%
+    mutate(price = scales::dollar(price))
+}, options = list(scrollY = "250px"))
+
+DTOutput(outputId = "dt_output_1")
+```
+
+
+
+
+
