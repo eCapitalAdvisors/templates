@@ -49,6 +49,38 @@ sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
 ```
 
+```{r, include = FALSE}
+#source code to plot the boxplot
+source("../R/plot_boxplot.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the histogram
+source("../R/plot_histogram.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the scatter plot
+source("../R/plot_scatter.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the fitted vs residual
+source("../R/plot_fitted_vs_residual.R")
+```
+
+```{r, include = FALSE}
+#source code to plot the bootstrap
+source("../R/plot_bootstrap.R")
+```
+
+```{r, include = FALSE}
+#source code to obtain a bootstrap and CI
+source("../R/get_bootstrap_and_ci.R")
+
+bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
+ci <- readRDS(file = "ci.rds")
+```
 
 Sidebar {.sidebar}
 ----------------------------------------------
