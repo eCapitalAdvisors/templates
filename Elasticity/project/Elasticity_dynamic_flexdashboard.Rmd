@@ -87,10 +87,23 @@ Sidebar {.sidebar}
 
 ``` {r}
 #Inputs
-checkboxGroupInput(inputId = "checkbox_group",
-                   label = h4("Checkbox Group"),
+checkboxGroupInput(inputId = "Cereal_brand",
+                   label = h4("Cereal Brands"),
                    choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+
+selectInput(inputId = "ChooseVar",
+            label = h4("Select Variable"),
+            choices = c(sales, price),
+            selected = vars[[1]])
+
+sliderInput(inputId = "ci",
+            label = h4("Select Confidence Interval"),
+            min = 0.5,
+            max = 0.95,
+            value = 0.95,
+            step = 0.05,
+            pre = "%")
 ```
 
 ```{r}
@@ -102,8 +115,16 @@ actionButton(inputId = "reset",
 observeEvent(eventExpr = input$reset, handlerExpr = {
   
   updateCheckboxGroupInput(session = session,
-                           inputId = "checkbox_group",
+                           inputId = "Cereal_brand",
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+  
+  updateSelectInput(session = session,
+                    inputId = "ChooseVar",
+                    selected = vars[[1]])
+  
+  updateSliderInput(session = session,
+                    inputId = "ci",
+                    value = .95)
 })
 ```
 
@@ -115,11 +136,26 @@ Column {data-width = 500}
 ### Section - Checkbox Output
 
 ```{r}
-output$checkbox_values <- renderPrint(input$checkbox_groups)
+output$checkbox_values <- renderPrint(input$Cereal_brand)
 
 textOutput(outputId = "checkbox_values")
 ```
 
+### Section - Select Ouput
+
+```{r}
+output$select_values <- renderPrint(input$ChooseVar)
+
+textOutput(outputId = "select_values")
+```
+
+### Section - Slider Output
+
+```{r}
+output$slider_values <- renderPrint(input$slider_input)
+
+textOutput(outputId = "slider_values")
+```
 
 Column {data-width = 750}
 ----------------------------------------------
@@ -128,7 +164,11 @@ Column {data-width = 750}
 # Reactive Filter
 sales_tbl_filtered <- reactive({
   sales_tbl %>%
-    filter(description %in% input$checkbox_group)
+    filter(description %in% input$Cereal_brand)
+})
+
+boxplot_filtered <- reactive({
+  sales_tbl[, c(input$ChooseVar)]
 })
 ```
 
@@ -142,6 +182,14 @@ output$dt_output_1 <- DT::renderDataTable(expr = {
 }, options = list(scrollY = "250px"))
 
 DTOutput(outputId = "dt_output_1")
+
+# renderTable(boxplot_filtered())
+output$dt_output_2 <- DT::renderDataTable(expr = {
+  boxplot_filtered() %>%
+    mutate(price = scales::dollar(price))
+}, options = list(scrollY = "250px"))
+
+DTOutput(outputId = "dt_output_2")
 ```
 
 
