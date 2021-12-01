@@ -13,6 +13,7 @@ runtime: shiny
 #Shiny
 library(flexdashboard)
 library(shiny)
+library(shinyWidgets)
 library(DT)
 
 #Core
@@ -87,10 +88,19 @@ Sidebar {.sidebar}
 
 ``` {r}
 #Inputs
-checkboxGroupInput(inputId = "checkbox_group",
-                   label = h4("Checkbox Group"),
+checkboxGroupButtons(inputId = "Cereal_brand",
+                   label = h4("Cereal Brands"),
                    choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
-                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                   direction = "vertical")
+
+sliderInput(inputId = "ci",
+            label = h4("Select Confidence Interval"),
+            min = 0.80,
+            max = 0.95,
+            value = 0.95,
+            step = 0.05,
+            pre = "%")
 ```
 
 ```{r}
@@ -101,9 +111,13 @@ actionButton(inputId = "reset",
 
 observeEvent(eventExpr = input$reset, handlerExpr = {
   
-  updateCheckboxGroupInput(session = session,
-                           inputId = "checkbox_group",
+  updateCheckboxGroupButtons(session = session,
+                           inputId = "Cereal_brand",
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+  
+  updateSlider(session = session,
+                    inputId = "ci",
+                    value = .95)
 })
 ```
 
@@ -115,9 +129,17 @@ Column {data-width = 500}
 ### Section - Checkbox Output
 
 ```{r}
-output$checkbox_values <- renderPrint(input$checkbox_groups)
+output$checkbox_values <- renderPrint(input$Cereal_brand)
 
 textOutput(outputId = "checkbox_values")
+```
+
+### Section - Slider Output
+
+```{r}
+output$slider_values <- renderPrint(input$ci)
+
+textOutput(outputId = "slider_values")
 ```
 
 
@@ -126,22 +148,24 @@ Column {data-width = 750}
 
 ```{r}
 # Reactive Filter
-sales_tbl_filtered <- reactive({
-  sales_tbl %>%
-    filter(description %in% input$checkbox_group)
+sales_sample_tbl_filtered <- reactive({
+  sales_sample_tbl %>%
+    filter(description %in% input$Cereal_brand)
 })
+
 ```
 
 ### Section - Reactive Output
 
 ```{r}
-# renderTable(sales_tbl_filtered())
-output$dt_output_1 <- DT::renderDataTable(expr = {
-  sales_tbl_filtered() %>%
-    mutate(price = scales::dollar(price))
-}, options = list(scrollY = "250px"))
+# renderTable(sales_sample_tbl_filtered())
 
-DTOutput(outputId = "dt_output_1")
+output$dt_output_1 <- renderPlot(expr = {
+  sales_sample_tbl <- sales_sample_tbl_filtered() %>%
+    plot_scatter()
+})
+
+plotOutput(outputId = "dt_output_1")
 ```
 
 
