@@ -6,6 +6,8 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     vertical_layout: fill
+    css: styles-default.css
+    logo: logo.png
 runtime: shiny
 ---
 
@@ -115,16 +117,17 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                            inputId = "Cereal_brand",
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
   
-  updateSlider(session = session,
+  updateSliderInput(session = session,
                     inputId = "ci",
                     value = .95)
 })
 ```
 
-(you can delete this column later)
 
 Column {data-width = 500}
 ----------------------------------------------
+
+(you can delete this column later)
 
 ### Section - Checkbox Output
 
@@ -148,7 +151,7 @@ Column {data-width = 750}
 
 ```{r}
 # Reactive Filter
-sales_sample_tbl_filtered <- reactive({
+dataset <- reactive({
   sales_sample_tbl %>%
     filter(description %in% input$Cereal_brand)
 })
@@ -160,12 +163,11 @@ sales_sample_tbl_filtered <- reactive({
 ```{r}
 # renderTable(sales_sample_tbl_filtered())
 
-output$dt_output_1 <- renderPlot(expr = {
-  sales_sample_tbl <- sales_sample_tbl_filtered() %>%
-    plot_scatter()
+output$scatter_plot <- renderPlot(expr = {
+  plot_scatter(sales_sample_tbl_filtered())
 })
 
-plotOutput(outputId = "dt_output_1")
+plotOutput(outputId = "scatter_plot")
 ```
 
 
