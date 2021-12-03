@@ -162,16 +162,6 @@ dataset <- reactive({
 
 ```{r}
 # renderTable(sales_sample_tbl_filtered())
-# 
-# output$scatter_plot <- renderPlot(expr = {
-#   plot_scatter(dataset())
-# })
-# 
-# plotOutput(outputId = "scatter_plot")
-```
-
-```{r}
-# renderTable(sales_sample_tbl_filtered())
 plotlyOutput("scatter_plot")
 
 output$scatter_plot <- renderPlotly({
