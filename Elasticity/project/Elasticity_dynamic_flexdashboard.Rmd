@@ -162,15 +162,33 @@ dataset <- reactive({
 
 ```{r}
 # renderTable(sales_sample_tbl_filtered())
+plotlyOutput("scatter_plot")
 
-output$scatter_plot <- renderPlot(expr = {
-  plot_scatter(sales_sample_tbl_filtered())
+output$scatter_plot <- renderPlotly({
+  data = dataset()
+  plot_scatter(data)
 })
-
-plotOutput(outputId = "scatter_plot")
 ```
 
-
+```{r, include = FALSE}
+# # This doesn't render ?
+# # Apparently this doesn't work with reactive elements? maybe I should not include this option? It would require me to input the data in the dashboard.
+# datatable(
+#   # you can change the table
+#   sales_tbl,
+#   extensions = 'Buttons', options = list(
+#     dom = 'Bfrtip',
+#     buttons = 
+#       list('copy', 'print', list(
+#         extend = 'collection',
+#         buttons = c('csv', 'excel', 'pdf'),
+#         text = 'Download'
+#       ))
+#     
+#   )
+# )
+#   
+```
 
 
 
