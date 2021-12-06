@@ -1,7 +1,6 @@
 ---
-title: "Dynamic Elasticity Flexdashboard"
-author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
-date: "11/19/2021"
+title: "Price Elasticity Analysis"
+date: "12/06/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -91,13 +90,13 @@ Sidebar {.sidebar}
 ``` {r}
 #Inputs
 checkboxGroupButtons(inputId = "Cereal_brand",
-                   label = h4("Cereal Brands"),
+                   label = h4("Select Cereal Brands:"),
                    choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    direction = "vertical")
 
 sliderInput(inputId = "ci",
-            label = h4("Select Confidence Interval"),
+            label = h4("Select Alpha:"),
             min = 0.80,
             max = 0.95,
             value = 0.95,
@@ -124,28 +123,6 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 ```
 
 
-Column {data-width = 500}
-----------------------------------------------
-
-(you can delete this column later)
-
-### Section - Checkbox Output
-
-```{r}
-output$checkbox_values <- renderPrint(input$Cereal_brand)
-
-textOutput(outputId = "checkbox_values")
-```
-
-### Section - Slider Output
-
-```{r}
-output$slider_values <- renderPrint(input$ci)
-
-textOutput(outputId = "slider_values")
-```
-
-
 Column {data-width = 750}
 ----------------------------------------------
 
@@ -158,7 +135,7 @@ dataset <- reactive({
 
 ```
 
-### Section - Reactive Output
+### Analysis
 
 ```{r}
 # renderTable(sales_sample_tbl_filtered())
