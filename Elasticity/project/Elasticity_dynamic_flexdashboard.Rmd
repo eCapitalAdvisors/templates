@@ -4,7 +4,7 @@ date: "12/06/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill
+    vertical_layout: scroll
     css: styles-default.css
     logo: logo.png
 runtime: shiny
@@ -21,6 +21,7 @@ library(DT)
 library(tidyverse)
 library(ggplot2)
 library(plotly)
+library(infer)
 library(readxl)
 ```
 
@@ -95,7 +96,7 @@ checkboxGroupButtons(inputId = "Cereal_brand",
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    direction = "vertical")
 
-sliderInput(inputId = "ci",
+sliderInput(inputId = "alpha",
             label = h4("Select Alpha:"),
             min = 0.80,
             max = 0.95,
@@ -117,7 +118,7 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
   
   updateSliderInput(session = session,
-                    inputId = "ci",
+                    inputId = "alpha",
                     value = .95)
 })
 ```
@@ -132,7 +133,7 @@ Page 2
 
 ### Data Overview
 
-- Add Pie charts and shit
+<!-- - Add Pie charts and stuff -->
 
 Page 3
 ==============================================
@@ -143,28 +144,32 @@ Column {data-width = 500}
 ### Elasticity Analysis
 
 ```{r}
-# Reactive Filter
+# Reactive Filter - Description
 dataset <- reactive({
   sales_sample_tbl %>%
     filter(description %in% input$Cereal_brand)
 })
+```
 
+```{r}
+# Reactive Filter - Alpha Level
 reactive_alpha <- reactive({
-  ci <- bootstrap_tbl %>%
+  new_ci_tbl <- bootstrap_tbl %>%
     group_by(term) %>%
     nest() %>%
     mutate(perc_ci = map(
       data,
       get_confidence_interval,
-      level = input$ci,
-      type ="percentile"
+      level = input$alpha,
+      type = "percentile"
     )) %>%
     unnest(perc_ci)
 })
 
 ```
 
-```{r}
+```{r} 
+# Scatter Plot
 # renderTable(dataset())
 plotlyOutput("scatter_plot")
 
@@ -172,7 +177,10 @@ output$scatter_plot <- renderPlotly({
   data = dataset()
   plot_scatter(data)
 })
+```
 
+```{r}
+# Bootstrap plot
 # renderTable(reactive_alpha())
 plotlyOutput("bootstrap_plot")
 
@@ -180,26 +188,6 @@ output$bootstrap_plot <- renderPlotly({
   data = reactive_alpha()
   plot_bootstrap(data)
 })
-```
-
-```{r, include = FALSE}
-# # This doesn't render ?
-# # Apparently this doesn't work with reactive elements? maybe I should not include this option? It would require me to input the data in the dashboard.
-# datatable(
-#   # you can change the table
-#   sales_tbl,
-#   extensions = 'Buttons', options = list(
-#     dom = 'Bfrtip',
-#     buttons = 
-#       list('copy', 'print', list(
-#         extend = 'collection',
-#         buttons = c('csv', 'excel', 'pdf'),
-#         text = 'Download'
-#       ))
-#     
-#   )
-# )
-#   
 ```
 
 
