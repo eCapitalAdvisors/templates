@@ -85,7 +85,7 @@ ci <- readRDS(file = "ci.rds")
 ```
 
 Sidebar {.sidebar}
-----------------------------------------------
+==============================================
 
 ``` {r}
 #Inputs
@@ -122,9 +122,25 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 })
 ```
 
+Page 1
+==============================================
 
-Column {data-width = 750}
+### About Elasticity
+
+Page 2
+==============================================
+
+### Data Overview
+
+- Add Pie charts and shit
+
+Page 3
+==============================================
+
+Column {data-width = 500}
 ----------------------------------------------
+
+### Elasticity Analysis
 
 ```{r}
 # Reactive Filter
@@ -133,17 +149,36 @@ dataset <- reactive({
     filter(description %in% input$Cereal_brand)
 })
 
+reactive_alpha <- reactive({
+  ci <- bootstrap_tbl %>%
+    group_by(term) %>%
+    nest() %>%
+    mutate(perc_ci = map(
+      data,
+      get_confidence_interval,
+      level = input$ci,
+      type ="percentile"
+    )) %>%
+    unnest(perc_ci)
+})
+
 ```
 
-### Analysis
-
 ```{r}
-# renderTable(sales_sample_tbl_filtered())
+# renderTable(dataset())
 plotlyOutput("scatter_plot")
 
 output$scatter_plot <- renderPlotly({
   data = dataset()
   plot_scatter(data)
+})
+
+# renderTable(reactive_alpha())
+plotlyOutput("bootstrap_plot")
+
+output$bootstrap_plot <- renderPlotly({
+  data = reactive_alpha()
+  plot_bootstrap(data)
 })
 ```
 
@@ -166,6 +201,11 @@ output$scatter_plot <- renderPlotly({
 # )
 #   
 ```
+
+
+- add a stores selection where they can compare stores revenue 
+- add a timeline option vs revenue
+
 
 
 
