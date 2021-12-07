@@ -1,11 +1,10 @@
 ---
-title: "Dynamic Elasticity Flexdashboard"
-author: "Lila Sahar and Juan Malaver, eCapital Advisors, Business Data Science"
-date: "11/19/2021"
+title: "Price Elasticity Analysis"
+date: "12/06/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill
+    vertical_layout: scroll
     css: styles-default.css
     logo: logo.png
 runtime: shiny
@@ -22,6 +21,7 @@ library(DT)
 library(tidyverse)
 library(ggplot2)
 library(plotly)
+library(infer)
 library(readxl)
 ```
 
@@ -86,18 +86,18 @@ ci <- readRDS(file = "ci.rds")
 ```
 
 Sidebar {.sidebar}
-----------------------------------------------
+==============================================
 
 ``` {r}
 #Inputs
 checkboxGroupButtons(inputId = "Cereal_brand",
-                   label = h4("Cereal Brands"),
+                   label = h4("Select Cereal Brands:"),
                    choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    direction = "vertical")
 
-sliderInput(inputId = "ci",
-            label = h4("Select Confidence Interval"),
+sliderInput(inputId = "alpha",
+            label = h4("Select Alpha:"),
             min = 0.80,
             max = 0.95,
             value = 0.95,
@@ -118,50 +118,59 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
   
   updateSliderInput(session = session,
-                    inputId = "ci",
+                    inputId = "alpha",
                     value = .95)
 })
 ```
 
+Page 1
+==============================================
+
+### About Elasticity
+
+Page 2
+==============================================
+
+### Data Overview
+
+<!-- - Add Pie charts and stuff -->
+
+Page 3
+==============================================
 
 Column {data-width = 500}
 ----------------------------------------------
 
-(you can delete this column later)
-
-### Section - Checkbox Output
+### Elasticity Analysis
 
 ```{r}
-output$checkbox_values <- renderPrint(input$Cereal_brand)
-
-textOutput(outputId = "checkbox_values")
-```
-
-### Section - Slider Output
-
-```{r}
-output$slider_values <- renderPrint(input$ci)
-
-textOutput(outputId = "slider_values")
-```
-
-
-Column {data-width = 750}
-----------------------------------------------
-
-```{r}
-# Reactive Filter
+# Reactive Filter - Description
 dataset <- reactive({
   sales_sample_tbl %>%
     filter(description %in% input$Cereal_brand)
 })
+```
+
+```{r}
+# Reactive Filter - Alpha Level
+reactive_alpha <- reactive({
+  new_ci_tbl <- bootstrap_tbl %>%
+    group_by(term) %>%
+    nest() %>%
+    mutate(perc_ci = map(
+      data,
+      get_confidence_interval,
+      level = input$alpha,
+      type = "percentile"
+    )) %>%
+    unnest(perc_ci)
+})
 
 ```
 
-### Section - Reactive Output
-
-```{r}
-# renderTable(sales_sample_tbl_filtered())
+```{r} 
+# Scatter Plot
+# renderTable(dataset())
 plotlyOutput("scatter_plot")
 
 output$scatter_plot <- renderPlotly({
@@ -170,25 +179,21 @@ output$scatter_plot <- renderPlotly({
 })
 ```
 
-```{r, include = FALSE}
-# # This doesn't render ?
-# # Apparently this doesn't work with reactive elements? maybe I should not include this option? It would require me to input the data in the dashboard.
-# datatable(
-#   # you can change the table
-#   sales_tbl,
-#   extensions = 'Buttons', options = list(
-#     dom = 'Bfrtip',
-#     buttons = 
-#       list('copy', 'print', list(
-#         extend = 'collection',
-#         buttons = c('csv', 'excel', 'pdf'),
-#         text = 'Download'
-#       ))
-#     
-#   )
-# )
-#   
+```{r}
+# Bootstrap plot
+# renderTable(reactive_alpha())
+plotlyOutput("bootstrap_plot")
+
+output$bootstrap_plot <- renderPlotly({
+  data = reactive_alpha()
+  plot_bootstrap(data)
+})
 ```
+
+
+- add a stores selection where they can compare stores revenue 
+- add a timeline option vs revenue
+
 
 
 

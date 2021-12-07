@@ -40,7 +40,8 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
            title = "Price vs. Box Sales", caption = "The x and y values
        are transformed on a log scale.", color = "Brand Names") +
       guides(color = guide_legend(title = "Brand Names")) + 
-      theme(plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5))
+      theme(plot.title = element_text(hjust = .5, face = "bold"), legend.title = element_text(face = "bold"), plot.caption = element_text(hjust = .5)) +
+      scale_color_manual(values = c("#0071CE", "#FFC627", "#646569"))
     
     ggplotly(p) 
   }
