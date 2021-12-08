@@ -53,8 +53,14 @@ input_us_locations <- function(us_locations_path) {
     select(zip, city, state_name)
 }
 
-us_locations_path <- "uszips.xlsx"
-us_locations_tbl <- input_us_locations(us_locations_path)
+# must figure out how to get the state name
+get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
+  
+  filtered_store_locations_tbl <- store_locations_tbl %>%
+    left_join(us_locations_tbl)
+}
+
+filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
@@ -253,10 +259,12 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # descriptions_path <- "raw_data_cereal_descriptions.xlsx"
 # prices_path <- "raw_data_cereal_prices.xlsx"
 # store_locations_path <- "demo.dta"
+# us_locations_path <- "uszips.xlsx"
 #
 # descriptions_tbl <- input_descriptions(descriptions_path)
 # prices_tbl <- input_prices(prices_path)
-# store_locations_tbl <- input_locations(store_locations_path)
+# store_locations_tbl <- input_store_locations(store_locations_path)
+# us_locations_tbl <- input_us_locations(us_locations_path)
 # 
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
