@@ -9,10 +9,11 @@
 
 ## Loading Data
 
-## install.packages("readxl")
 ## install.packages("tidyverse")
-library(readxl)
+## install.packages("readxl")
+
 library(tidyverse)
+library(readxl)
 
 ## I am importing the xlsx files into R.
 import_data <- function(filename) {

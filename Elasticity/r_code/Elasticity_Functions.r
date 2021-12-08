@@ -13,8 +13,9 @@ library(plotly)
 library(broom)
 library(infer)
 library(readxl)
+library(haven)
 
-## function for sales and price data
+## function for sales and price and store location data
 input_descriptions <- function(descriptions_path) {
   
   # importing file
@@ -34,6 +35,32 @@ input_prices <- function(prices_path) {
     filter(MOVE > 0) %>%
     rename(sales = MOVE, price = PRICE)
 }
+
+input_store_locations <- function(store_locations_path) {
+  
+  #importing file
+  store_locations_tbl <- read_dta(store_locations_path) %>%
+    select(city, zip, store) %>%
+    filter(city != "") %>%
+    filter(!is.na(zip)) %>%
+    filter(!is.na(store))
+}
+
+input_us_locations <- function(us_locations_path) {
+  
+  #importing file
+  us_locations_tbl <- read_excel(us_locations_path) %>%
+    select(zip, city, state_name)
+}
+
+# must figure out how to get the state name
+get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
+  
+  filtered_store_locations_tbl <- store_locations_tbl %>%
+    left_join(us_locations_tbl)
+}
+
+filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
@@ -231,9 +258,13 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # ## setting file paths
 # descriptions_path <- "raw_data_cereal_descriptions.xlsx"
 # prices_path <- "raw_data_cereal_prices.xlsx"
-# 
+# store_locations_path <- "demo.dta"
+# us_locations_path <- "uszips.xlsx"
+#
 # descriptions_tbl <- input_descriptions(descriptions_path)
 # prices_tbl <- input_prices(prices_path)
+# store_locations_tbl <- input_store_locations(store_locations_path)
+# us_locations_tbl <- input_us_locations(us_locations_path)
 # 
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
