@@ -13,6 +13,7 @@ library(plotly)
 library(broom)
 library(infer)
 library(readxl)
+library(haven)
 
 ## function for sales and price data
 input_descriptions <- function(descriptions_path) {
@@ -34,6 +35,18 @@ input_prices <- function(prices_path) {
     filter(MOVE > 0) %>%
     rename(sales = MOVE, price = PRICE)
 }
+
+input_locations <- function(locations_path) {
+  
+  #importing file
+  locations_tbl <- read_dta(locations_path) %>%
+    select(city, zip, store) #%>%
+    filter(!is.na(city)) %>%
+    filter(!is.na(zip)) %>%
+    filter(!is.na(store))
+}
+
+my_data_store <- input_locations("demo.dta")
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
