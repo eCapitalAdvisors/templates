@@ -15,7 +15,7 @@ library(infer)
 library(readxl)
 library(haven)
 
-## function for sales and price data
+## function for sales and price and store location data
 input_descriptions <- function(descriptions_path) {
   
   # importing file
@@ -36,17 +36,15 @@ input_prices <- function(prices_path) {
     rename(sales = MOVE, price = PRICE)
 }
 
-input_locations <- function(locations_path) {
+input_store_locations <- function(store_locations_path) {
   
   #importing file
-  locations_tbl <- read_dta(locations_path) %>%
-    select(city, zip, store) #%>%
-    filter(!is.na(city)) %>%
+  locations_tbl <- read_dta(store_locations_path) %>%
+    select(city, zip, store) %>%
+    filter(city != "") %>%
     filter(!is.na(zip)) %>%
     filter(!is.na(store))
 }
-
-my_data_store <- input_locations("demo.dta")
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
@@ -244,9 +242,11 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # ## setting file paths
 # descriptions_path <- "raw_data_cereal_descriptions.xlsx"
 # prices_path <- "raw_data_cereal_prices.xlsx"
-# 
+# store_locations_path <- "demo.dta"
+#
 # descriptions_tbl <- input_descriptions(descriptions_path)
 # prices_tbl <- input_prices(prices_path)
+# store_locations_tbl <- input_locations(store_locations_path)
 # 
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
