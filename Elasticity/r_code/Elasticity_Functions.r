@@ -39,12 +39,22 @@ input_prices <- function(prices_path) {
 input_store_locations <- function(store_locations_path) {
   
   #importing file
-  locations_tbl <- read_dta(store_locations_path) %>%
+  store_locations_tbl <- read_dta(store_locations_path) %>%
     select(city, zip, store) %>%
     filter(city != "") %>%
     filter(!is.na(zip)) %>%
     filter(!is.na(store))
 }
+
+input_us_locations <- function(us_locations_path) {
+  
+  #importing file
+  us_locations_tbl <- read_excel(us_locations_path) %>%
+    select(zip, city, state_name)
+}
+
+us_locations_path <- "uszips.xlsx"
+us_locations_tbl <- input_us_locations(us_locations_path)
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
