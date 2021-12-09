@@ -112,7 +112,31 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     coord_flip()
 
   hide_legend(ggplotly(p))
-  }
+}
+
+plot_violin_sales <- function(sales_tbl, x_title, y_title, title_chart) {
+  
+  #graphing a box plot
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
+    geom_violin() +
+    labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+  
+  hide_legend(ggplotly(p))
+}
+
+plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
+  
+  #graphing a box plot
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(price), color = description)) +
+    geom_violin() +
+    labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+  
+  hide_legend(ggplotly(p))
+}
 
 plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
@@ -276,6 +300,9 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 # 
+# plot_violin_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
+# plot_violin_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+#
 # plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
