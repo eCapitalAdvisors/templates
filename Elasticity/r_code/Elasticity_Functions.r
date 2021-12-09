@@ -30,10 +30,10 @@ input_prices <- function(prices_path) {
   
   # importing file
   prices_tbl <- read_excel(prices_path) %>%
-    select(UPC, MOVE, PRICE) %>%
+    select(STORE, UPC, WEEK, MOVE, QTY, PRICE) %>%
     filter(PRICE > 0) %>%
     filter(MOVE > 0) %>%
-    rename(sales = MOVE, price = PRICE)
+    rename(store = STORE, week = WEEK, sales = MOVE, quantity = QTY, price = PRICE)
 }
 
 input_store_locations <- function(store_locations_path) {
@@ -42,6 +42,7 @@ input_store_locations <- function(store_locations_path) {
   store_locations_tbl <- read_dta(store_locations_path) %>%
     select(city, zip, store) %>%
     filter(city != "") %>%
+    mutate(city = str_to_title(city)) %>%
     filter(!is.na(zip)) %>%
     filter(!is.na(store))
 }
@@ -50,7 +51,7 @@ input_us_locations <- function(us_locations_path) {
   
   #importing file
   us_locations_tbl <- read_excel(us_locations_path) %>%
-    select(zip, city, state_name)
+    select(zip, state_name)
 }
 
 # must figure out how to get the state name
@@ -59,8 +60,6 @@ get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   filtered_store_locations_tbl <- store_locations_tbl %>%
     left_join(us_locations_tbl)
 }
-
-filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
 
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   
@@ -73,13 +72,14 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
     slice_max(total_count, n = 3)
 }
 
-get_sales <- function(descriptions_tbl, prices_tbl, top_three_brands_tbl) {
+get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl) {
   
   # filtering to top three brands
   sales_tbl <- prices_tbl %>%
     inner_join(descriptions_tbl) %>%
     inner_join(top_three_brands_tbl) %>%
-    select(sales, price, description)
+    inner_join(filtered_store_locations_tbl) %>%
+    select(week, sales, quantity, price, description, city, zip, state_name)
 }
 
 get_sales_sample <- function(sales_tbl){
@@ -112,7 +112,31 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     coord_flip()
 
   hide_legend(ggplotly(p))
-  }
+}
+
+plot_violin_sales <- function(sales_tbl, x_title, y_title, title_chart) {
+  
+  #graphing a box plot
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(sales), color = description)) +
+    geom_violin() +
+    labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+  
+  hide_legend(ggplotly(p))
+}
+
+plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
+  
+  #graphing a box plot
+  p <- ggplot(data = sales_tbl, aes(x = description, y = log(price), color = description)) +
+    geom_violin() +
+    labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
+    theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
+    coord_flip()
+  
+  hide_legend(ggplotly(p))
+}
 
 plot_histogram_sales <- function(sales_tbl, x_title, title_chart){
   
@@ -265,16 +289,20 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # prices_tbl <- input_prices(prices_path)
 # store_locations_tbl <- input_store_locations(store_locations_path)
 # us_locations_tbl <- input_us_locations(us_locations_path)
-# 
+# filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
+#
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
-# sales_tbl <- get_sales(descriptions_tbl, prices_tbl, top_three_brands_tbl)
+# sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl)
 # 
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 # 
+# plot_violin_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
+# plot_violin_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+#
 # plot_histogram_sales(sales_tbl, "Sales of Cereal Boxes", "Distribution of Sales")
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 

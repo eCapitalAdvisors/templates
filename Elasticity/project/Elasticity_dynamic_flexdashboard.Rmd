@@ -58,6 +58,11 @@ source("../R/plot_boxplot.R")
 ```
 
 ```{r, include = FALSE}
+#source code to plot the violin plot
+source("../R/plot_violin.R")
+```
+
+```{r, include = FALSE}
 #source code to plot the histogram
 source("../R/plot_histogram.R")
 ```
@@ -85,8 +90,56 @@ bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
 ci <- readRDS(file = "ci.rds")
 ```
 
-Sidebar {.sidebar}
+
+Page 1
 ==============================================
+
+### About Elasticity
+
+
+Page 2
+==============================================
+
+Sidebar {.sidebar}
+----------------------------------------------
+
+``` {r}
+#Inputs
+checkboxGroupButtons(inputId = "Cereal_brand",
+                   label = h4("Select Cereal Brands:"),
+                   choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                   direction = "vertical")
+
+```
+
+```{r}
+# Reset Button
+actionButton(inputId = "reset",
+             label = "Reset",
+             icon = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
+  
+  updateCheckboxGroupButtons(session = session,
+                           inputId = "Cereal_brand",
+                           selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+})
+```
+
+Column {data-width = 500}
+----------------------------------------------
+
+### Data Overview
+
+<!-- - Add Pie charts and stuff -->
+
+
+Page 3
+==============================================
+
+Sidebar {.sidebar}
+----------------------------------------------
 
 ``` {r}
 #Inputs
@@ -122,21 +175,6 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                     value = .95)
 })
 ```
-
-Page 1
-==============================================
-
-### About Elasticity
-
-Page 2
-==============================================
-
-### Data Overview
-
-<!-- - Add Pie charts and stuff -->
-
-Page 3
-==============================================
 
 Column {data-width = 500}
 ----------------------------------------------
@@ -189,11 +227,6 @@ output$bootstrap_plot <- renderPlotly({
   plot_bootstrap(data)
 })
 ```
-
-
-- add a stores selection where they can compare stores revenue 
-- add a timeline option vs revenue
-
 
 
 
