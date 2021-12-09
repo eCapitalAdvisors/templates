@@ -1,12 +1,13 @@
 # Cleaned data
 
-get_sales <- function(descriptions_tbl, prices_tbl, top_three_brands_tbl) {
+get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl) {
   
   # filtering to top three brands
   sales_tbl <- prices_tbl %>%
     inner_join(descriptions_tbl) %>%
     inner_join(top_three_brands_tbl) %>%
-    select(sales, price, description)
+    inner_join(filtered_store_locations_tbl) %>%
+    select(week, sales, quantity, price, description, city, zip, state_name)
   
   saveRDS(object = sales_tbl, file = "sales_tbl.rds")
 }
