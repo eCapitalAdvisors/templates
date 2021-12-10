@@ -5,7 +5,6 @@
 #' output: github_document
 #' ---
 #' 
-#' 
 
 ## loading libraries
 library(tidyverse)
@@ -103,7 +102,7 @@ get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl
     inner_join(top_three_brands_tbl) %>%
     inner_join(filtered_store_locations_tbl) %>%
     inner_join(dates_tbl) %>%
-    select(sales, quantity, price, description, city, zip, state_name, start, end)
+    select(start, end, price, sales, description, quantity, city, zip, state_name)
 }
 
 get_sales_sample <- function(sales_tbl){

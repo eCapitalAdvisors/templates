@@ -46,7 +46,31 @@ input_us_locations <- function(us_locations_path) {
   saveRDS(object = us_locations_tbl, file = "us_locations_tbl.rds")
 }
 
-# must figure out how to get the state name
+input_dates <- function() {
+  
+  d <- as_date(7196)
+  e <- as_date(7202)
+  
+  week <- seq(1,400) 
+  
+  start <- vector()
+  start<- append(start,d)
+  
+  end <- vector()
+  end<- append(end, e)
+  
+  for (i in 1:399) {
+    start<- append(start, d + 7)
+    end <- append(end, e + 7)
+    d <- d + 7
+    e <- e + 7
+    
+    saveRDS(object = dates_tbl, file = "dates_tbl.rds")
+  }
+  
+  dates_tbl <- data.frame(week = week, start = start, end = end)
+}
+
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
   filtered_store_locations_tbl <- store_locations_tbl %>%
