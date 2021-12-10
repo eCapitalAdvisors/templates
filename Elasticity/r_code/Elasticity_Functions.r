@@ -5,13 +5,13 @@
 #' output: github_document
 #' ---
 #' 
-#' 
 
 ## loading libraries
 library(tidyverse)
 library(plotly)
 library(broom)
 library(infer)
+library(lubridate)
 library(readxl)
 library(haven)
 
@@ -54,7 +54,29 @@ input_us_locations <- function(us_locations_path) {
     select(zip, state_name)
 }
 
-# must figure out how to get the state name
+input_dates <- function() {
+  
+  d <- as_date(7196)
+  e <- as_date(7202)
+  
+  week <- seq(1,400) 
+  
+  start <- vector()
+  start<- append(start,d)
+  
+  end <- vector()
+  end<- append(end, e)
+  
+  for (i in 1:399) {
+    start<- append(start, d + 7)
+    end <- append(end, e + 7)
+    d <- d + 7
+    e <- e + 7
+  }
+  
+  dates_tbl <- data.frame(week = week, start = start, end = end)
+}
+
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
   filtered_store_locations_tbl <- store_locations_tbl %>%
@@ -72,14 +94,15 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
     slice_max(total_count, n = 3)
 }
 
-get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl) {
+get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl) {
   
   # filtering to top three brands
   sales_tbl <- prices_tbl %>%
     inner_join(descriptions_tbl) %>%
     inner_join(top_three_brands_tbl) %>%
     inner_join(filtered_store_locations_tbl) %>%
-    select(week, sales, quantity, price, description, city, zip, state_name)
+    inner_join(dates_tbl) %>%
+    select(start, end, price, sales, description, quantity, city, zip, state_name)
 }
 
 get_sales_sample <- function(sales_tbl){
@@ -290,10 +313,11 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # store_locations_tbl <- input_store_locations(store_locations_path)
 # us_locations_tbl <- input_us_locations(us_locations_path)
 # filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
+# dates_tbl <- input_dates()
 #
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
-# sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl)
+# sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl)
 # 
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
 #
