@@ -238,9 +238,14 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-# THIS IS NOT WORKING HOW I WANT IT TO
-ggplot(data = average_tbl, aes(x = 'year(start)', y = avg_revenue)) +
-  geom_point()
+plot_avg_revenue_line <- function(average_tbl) {
+  ggplot(data = average_tbl, aes(x = `year(start)`, y = avg_revenue, color = description)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Average Revenue per Year", x = "Year", y = "Average Revenue") +
+    guides(color = guide_legend("Brand Name")) +
+    theme(plot.title = element_text(hjust = .5, face = "bold"))
+}
 
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
@@ -346,6 +351,8 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # plot_histogram_price(sales_tbl, "Price of Cereal Boxes", "Distribution of Prices")
 # 
 # plot_scatter(sales_sample_tbl)
+#
+# plot_avg_revenue_line(average_tbl)
 # 
 # plot_fitted_vs_residual(sales_sample_tbl, model = "REM")
 # plot_fitted_vs_residual(sales_sample_tbl, model = "MEM")
