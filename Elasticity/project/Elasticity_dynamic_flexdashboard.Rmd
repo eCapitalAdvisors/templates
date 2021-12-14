@@ -111,6 +111,13 @@ checkboxGroupButtons(inputId = "Cereal_brand",
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    direction = "vertical")
 
+dateInput(inputId = "Date_selection",
+          label = h4("Date Selection:"),
+          value = 1989-09-14,
+          min = 1989-09-14,
+          max = 1997-05-14,
+          startview = "month",
+          weekstart = 4)
 ```
 
 ```{r}
@@ -124,15 +131,50 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
   updateCheckboxGroupButtons(session = session,
                            inputId = "Cereal_brand",
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
+  
+  updateDateInput(session = session,
+                  inputId = "Date_selection",
+                  selected = NA)
 })
 ```
 
-Column {data-width = 500}
+Row
 ----------------------------------------------
 
 ### Data Overview
 
-<!-- - Add Pie charts and stuff -->
+### Total Revenue {.value-box}
+
+``` {r}
+# total_revenue is a reactive expression that computes the total revenue
+# of the cereals selected in the time frame selected.
+
+#total_revenue <- reactive({
+#  sales_tbl %>%
+#  filter(sales, quantity, price) %>%
+#  mutate(revenue = price * sales / quantity) %>%
+#  filter(revenue )
+#})
+
+# Help !!
+
+```
+
+### Total Quantity Sold {.value-box}
+
+```{r}
+# total_quantity_sold is a reactive expression that computes the total quantity sold
+# of the cereals selected in the time frame selected.
+
+```
+
+### AVG Unit Price {.value-box}
+
+```{r}
+# avg_unit_price is a reactive expression that computes the avg unit price
+# of the cereals selected over the time frame selected.
+```
+
 
 
 Page 3

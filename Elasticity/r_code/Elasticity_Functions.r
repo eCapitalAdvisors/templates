@@ -30,10 +30,10 @@ input_prices <- function(prices_path) {
   
   # importing file
   prices_tbl <- read_excel(prices_path) %>%
-    select(STORE, UPC, WEEK, MOVE, QTY, PRICE) %>%
+    select(STORE, UPC, WEEK, MOVE, PRICE) %>%
     filter(PRICE > 0) %>%
     filter(MOVE > 0) %>%
-    rename(store = STORE, week = WEEK, sales = MOVE, quantity = QTY, price = PRICE)
+    rename(store = STORE, week = WEEK, sales = MOVE, price = PRICE)
 }
 
 input_store_locations <- function(store_locations_path) {
@@ -102,7 +102,8 @@ get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl
     inner_join(top_three_brands_tbl) %>%
     inner_join(filtered_store_locations_tbl) %>%
     inner_join(dates_tbl) %>%
-    select(start, end, price, sales, description, quantity, city, zip, state_name)
+    select(start, end, price, sales, description, city, zip, state_name) %>%
+    mutate(revenue = price * sales)
 }
 
 get_sales_sample <- function(sales_tbl){
@@ -111,6 +112,14 @@ get_sales_sample <- function(sales_tbl){
   sales_sample_tbl <- sales_tbl %>%
     group_by(description) %>%
     sample_n(1000)
+}
+
+get_average <- function(sales_tbl) {
+  
+  #get average for revenue and prices
+  average_tbl <- sales_tbl %>%
+    group_by(description, year(start)) %>%
+    summarize(avg_revenue = mean(price * sales), avg_price = mean(price))
 }
 
 plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
@@ -229,6 +238,10 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
+# THIS IS NOT WORKING HOW I WANT IT TO
+ggplot(data = average_tbl, aes(x = 'year(start)', y = avg_revenue)) +
+  geom_point()
+
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
   if (model == "REM") {
@@ -320,6 +333,8 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl)
 # 
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
+#
+# average_tbl <- get_average(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
