@@ -7,12 +7,17 @@
 #' 
 
 ## loading libraries
+
+# core
 library(tidyverse)
-library(plotly)
 library(broom)
 library(infer)
 library(lubridate)
 library(readxl)
+
+# visuals
+library(plotly)
+library(usmap)
 library(haven)
 
 ## function for sales and price and store location data
@@ -273,6 +278,9 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
     ggplotly(p)
   }
 }
+
+plot_usmap(include = "IL") +
+  labs(title = "Illinois") 
 
 ## Bootstrapping Method
 
