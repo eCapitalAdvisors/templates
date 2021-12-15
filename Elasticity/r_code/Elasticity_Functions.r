@@ -17,7 +17,8 @@ library(readxl)
 
 # visuals
 library(plotly)
-library(usmap)
+library(ggmap)
+library(maps)
 library(haven)
 
 ## function for sales and price and store location data
@@ -28,7 +29,6 @@ input_descriptions <- function(descriptions_path) {
     select(UPC, DESCRIP) %>%
     rename(description = DESCRIP) %>%
     mutate(description = recode(description, `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch", `KIX` = "Kix", `WHEATIES` = "Wheaties"))
-  
 }  
 
 input_prices <- function(prices_path) {
@@ -45,11 +45,13 @@ input_store_locations <- function(store_locations_path) {
   
   #importing file
   store_locations_tbl <- read_dta(store_locations_path) %>%
-    select(city, zip, store) %>%
+    select(city, zip, lat, long, store) %>%
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
     filter(!is.na(zip)) %>%
-    filter(!is.na(store))
+    filter(!is.na(store)) %>%
+    mutate(lat = format(lat / 10000, nsmall = 4)) %>%
+    mutate(long = format(long / 10000, nsmall = 4))
 }
 
 input_us_locations <- function(us_locations_path) {
@@ -84,6 +86,7 @@ input_dates <- function() {
 
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
+  # This table tells us all the unique store locations
   filtered_store_locations_tbl <- store_locations_tbl %>%
     left_join(us_locations_tbl)
 }
@@ -107,7 +110,7 @@ get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl
     inner_join(top_three_brands_tbl) %>%
     inner_join(filtered_store_locations_tbl) %>%
     inner_join(dates_tbl) %>%
-    select(start, end, price, sales, description, city, zip, state_name) %>%
+    select(start, end, price, sales, description, city, zip, lat, long, state_name) %>%
     mutate(revenue = price * sales)
 }
 
@@ -252,6 +255,15 @@ plot_avg_revenue_line <- function(average_tbl) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
+IL_long <- c(-91.5435, -87.5355)
+IL_lat <- c(42.5650, 37.2172)
+IL_df <- as.data.frame(cbind(IL_long, IL_lat))
+
+Illinois <- get_map(location = c(IL_df$IL_long, IL_df$IL_lat), zoom = 4, maptype = "satellite", scale = 2)
+
+ggmap(Illinois)
+
+
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
   if (model == "REM") {
@@ -279,8 +291,6 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
   }
 }
 
-plot_usmap(include = "IL") +
-  labs(title = "Illinois") 
 
 ## Bootstrapping Method
 
