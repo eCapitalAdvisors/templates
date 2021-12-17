@@ -17,8 +17,8 @@ library(readxl)
 
 # visuals
 library(plotly)
-library(ggmap)
-library(maps)
+library(geojson)
+library(geojsonio)
 library(haven)
 
 ## function for sales and price and store location data
@@ -83,6 +83,14 @@ input_dates <- function() {
   
   dates_tbl <- data.frame(week = week, start = start, end = end)
 }
+
+input_illinois_map <- function(illinois_map_path) {
+  
+  illinois_map <- geojson_read(illinois_map_path)
+}
+
+illinois_map_path <- url("https://github.com/empet/Datasets/blob/master/illinois-election.geojson")
+illinois_map <- input_illinois_map(illinois_map_path)
 
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
@@ -255,13 +263,11 @@ plot_avg_revenue_line <- function(average_tbl) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
-IL_long <- c(-91.5435, -87.5355)
-IL_lat <- c(42.5650, 37.2172)
-IL_df <- as.data.frame(cbind(IL_long, IL_lat))
 
-Illinois <- get_map(location = c(IL_df$IL_long, IL_df$IL_lat), zoom = 4, maptype = "satellite", scale = 2)
+Illinois <- c(40.096958, -89.224606)
+map_illinois <- get_map(Illinois, zoom = 5, scale = 1)
 
-ggmap(Illinois)
+ggmap(map_illinois)
 
 
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
