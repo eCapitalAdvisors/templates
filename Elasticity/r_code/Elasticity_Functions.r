@@ -1,7 +1,7 @@
 #' ---
 #' title: "Template: Elasticity Functions"
 #' author: "Lila Sahar and Juan Malaver"
-#' date: "October 15, 2021"
+#' date: "December 17, 2021"
 #' output: github_document
 #' ---
 #' 
@@ -17,8 +17,12 @@ library(readxl)
 
 # visuals
 library(plotly)
-library(usmap)
+library(geojson)
+library(geojsonio)
 library(haven)
+library(mapproj)
+library(sp)
+library(ggrepel)
 
 ## function for sales and price and store location data
 input_descriptions <- function(descriptions_path) {
@@ -28,7 +32,6 @@ input_descriptions <- function(descriptions_path) {
     select(UPC, DESCRIP) %>%
     rename(description = DESCRIP) %>%
     mutate(description = recode(description, `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch", `KIX` = "Kix", `WHEATIES` = "Wheaties"))
-  
 }  
 
 input_prices <- function(prices_path) {
@@ -45,11 +48,13 @@ input_store_locations <- function(store_locations_path) {
   
   #importing file
   store_locations_tbl <- read_dta(store_locations_path) %>%
-    select(city, zip, store) %>%
+    select(city, zip, lat, long, store) %>%
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
     filter(!is.na(zip)) %>%
-    filter(!is.na(store))
+    filter(!is.na(store)) %>%
+    mutate(lat = format(lat / 10000, nsmall = 4)) %>%
+    mutate(long = format(long / 10000, nsmall = 4))
 }
 
 input_us_locations <- function(us_locations_path) {
@@ -82,8 +87,14 @@ input_dates <- function() {
   dates_tbl <- data.frame(week = week, start = start, end = end)
 }
 
+input_illinois_map <- function(illinois_map_path) {
+  
+  illinois_map <- geojson_read(illinois_map_path, what = "sp")
+}
+
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
+  # This table tells us all the unique store locations
   filtered_store_locations_tbl <- store_locations_tbl %>%
     left_join(us_locations_tbl)
 }
@@ -107,7 +118,7 @@ get_sales <- function(descriptions_tbl, prices_tbl, filtered_store_locations_tbl
     inner_join(top_three_brands_tbl) %>%
     inner_join(filtered_store_locations_tbl) %>%
     inner_join(dates_tbl) %>%
-    select(start, end, price, sales, description, city, zip, state_name) %>%
+    select(start, end, price, sales, description, city, zip, lat, long, state_name) %>%
     mutate(revenue = price * sales)
 }
 
@@ -125,6 +136,14 @@ get_average <- function(sales_tbl) {
   average_tbl <- sales_tbl %>%
     group_by(description, year(start)) %>%
     summarize(avg_revenue = mean(price * sales), avg_price = mean(price))
+}
+
+get_revenue_store <- function(sales_tbl) {
+  
+  #get total revenue per year for each store
+  revenue_store <- sales_tbl %>%
+    group_by(city, description, year(start)) %>%
+    summarise(sum_revenue = sum(price * sales), avg_price = mean(price))
 }
 
 plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
@@ -252,6 +271,16 @@ plot_avg_revenue_line <- function(average_tbl) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
+# the revenue tbl needs to visualize how much each location sells a year
+
+illinois_map_fortified <- tidy(illinois_map)
+
+ggplot() +
+  geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
+  geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
+  theme_void() +
+  coord_map()
+
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
   if (model == "REM") {
@@ -279,8 +308,6 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
   }
 }
 
-plot_usmap(include = "IL") +
-  labs(title = "Illinois") 
 
 ## Bootstrapping Method
 
@@ -333,6 +360,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # prices_path <- "raw_data_cereal_prices.xlsx"
 # store_locations_path <- "demo.dta"
 # us_locations_path <- "uszips.xlsx"
+# illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 #
 # descriptions_tbl <- input_descriptions(descriptions_path)
 # prices_tbl <- input_prices(prices_path)
@@ -340,6 +368,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # us_locations_tbl <- input_us_locations(us_locations_path)
 # filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
 # dates_tbl <- input_dates()
+# illinois_map <- input_illinois_map(illinois_map_path)
 #
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
@@ -348,6 +377,8 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
 #
 # average_tbl <- get_average(sales_tbl)
+#
+# revenue_store <- get_revenue_store(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
