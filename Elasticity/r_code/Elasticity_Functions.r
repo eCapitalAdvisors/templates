@@ -1,7 +1,7 @@
 #' ---
 #' title: "Template: Elasticity Functions"
 #' author: "Lila Sahar and Juan Malaver"
-#' date: "October 15, 2021"
+#' date: "December 17, 2021"
 #' output: github_document
 #' ---
 #' 
@@ -21,6 +21,7 @@ library(geojson)
 library(geojsonio)
 library(haven)
 library(mapproj)
+library(sp)
 library(ggrepel)
 
 ## function for sales and price and store location data
@@ -135,6 +136,14 @@ get_average <- function(sales_tbl) {
   average_tbl <- sales_tbl %>%
     group_by(description, year(start)) %>%
     summarize(avg_revenue = mean(price * sales), avg_price = mean(price))
+}
+
+get_revenue_store <- function(sales_tbl) {
+  
+  #get total revenue per year for each store
+  revenue_store <- sales_tbl %>%
+    group_by(city, description, year(start)) %>%
+    summarise(sum_revenue = sum(price * sales), avg_price = mean(price))
 }
 
 plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
@@ -262,6 +271,8 @@ plot_avg_revenue_line <- function(average_tbl) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
+# the revenue tbl needs to visualize how much each location sells a year
+
 illinois_map_fortified <- tidy(illinois_map)
 
 ggplot() +
@@ -366,6 +377,8 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
 #
 # average_tbl <- get_average(sales_tbl)
+#
+# revenue_store <- get_revenue_store(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
