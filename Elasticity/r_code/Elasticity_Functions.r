@@ -20,6 +20,8 @@ library(plotly)
 library(geojson)
 library(geojsonio)
 library(haven)
+library(mapproj)
+library(ggrepel)
 
 ## function for sales and price and store location data
 input_descriptions <- function(descriptions_path) {
@@ -86,11 +88,8 @@ input_dates <- function() {
 
 input_illinois_map <- function(illinois_map_path) {
   
-  illinois_map <- geojson_read(illinois_map_path)
+  illinois_map <- geojson_read(illinois_map_path, what = "sp")
 }
-
-illinois_map_path <- url("https://github.com/empet/Datasets/blob/master/illinois-election.geojson")
-illinois_map <- input_illinois_map(illinois_map_path)
 
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
@@ -263,12 +262,13 @@ plot_avg_revenue_line <- function(average_tbl) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
+illinois_map_fortified <- tidy(illinois_map)
 
-Illinois <- c(40.096958, -89.224606)
-map_illinois <- get_map(Illinois, zoom = 5, scale = 1)
-
-ggmap(map_illinois)
-
+ggplot() +
+  geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
+  geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
+  theme_void() +
+  coord_map()
 
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
   
@@ -349,6 +349,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # prices_path <- "raw_data_cereal_prices.xlsx"
 # store_locations_path <- "demo.dta"
 # us_locations_path <- "uszips.xlsx"
+# illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 #
 # descriptions_tbl <- input_descriptions(descriptions_path)
 # prices_tbl <- input_prices(prices_path)
@@ -356,6 +357,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # us_locations_tbl <- input_us_locations(us_locations_path)
 # filtered_store_locations_tbl <- get_store_locations(store_locations_tbl, us_locations_tbl)
 # dates_tbl <- input_dates()
+# illinois_map <- input_illinois_map(illinois_map_path)
 #
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # 
