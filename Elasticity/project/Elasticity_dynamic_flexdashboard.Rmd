@@ -111,11 +111,13 @@ checkboxGroupButtons(inputId = "Cereal_brand",
                    selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
                    direction = "vertical")
 
-dateInput(inputId = "Date_selection",
+dateRangeInput(inputId = "Date_Range",
           label = h4("Date Selection:"),
-          value = 1989-09-14,
-          min = 1989-09-14,
-          max = 1997-05-14,
+          start = 1989-09-14,
+          end = 1997-05-14,
+          min = min(sales_tbl$start),
+          max = max(sales_tbl$end),
+          format = "yyyy-mm-dd",
           startview = "month",
           weekstart = 4)
 ```
@@ -133,8 +135,9 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
   
   updateDateInput(session = session,
-                  inputId = "Date_selection",
-                  selected = NA)
+                  inputId = "Date_Range",
+                  start = min(sales_tbl$start),
+                  end = max(sales_tbl$end))
 })
 ```
 
