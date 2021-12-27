@@ -21,3 +21,24 @@ get_sales_sample <- function(sales_tbl){
   
   saveRDS(object = sales_sample_tbl, file = "sales_sample_tbl.rds")
 }
+
+get_average <- function(sales_tbl) {
+  
+  #get average for revenue and prices
+  average_tbl <- sales_tbl %>%
+    group_by(description, year(start)) %>%
+    summarize(avg_revenue = mean(price * sales), avg_price = mean(price))
+
+  saveRDS(object = average_tbl, file = "average_tbl.rds")
+}
+
+get_revenue_store <- function(sales_tbl) {
+  
+  #get total revenue per year for each store
+  revenue_store <- sales_tbl %>%
+    group_by(city, description, year(start)) %>%
+    summarise(sum_revenue = sum(price * sales), avg_price = mean(price))
+
+  saveRDS(object = revenue_store, file = "revenue_store.rds")
+}
+
