@@ -32,15 +32,23 @@ source("../R/cleaning_data.R")
 #importing data
 descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
 prices_path <- "../data/raw_data_cereal_prices.xlsx"
+store_locations_path <- "demo.dta"
+us_locations_path <- "uszips.xlsx"
+illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 
 descriptions_tbl <- readRDS(file = "descriptions_tbl.rds")
 prices_tbl <- readRDS(file = "prices_tbl.rds")
+store_locations_tbl <- readRDS(file = "store_locations_tbl.rds")
+us_locations_tbl <- readRDS(file = "us_locations_tbl.rds")
+dates_tbl <- readRDS(file = "dates_tbl.rds")
+illinois_map <- readRDS(file = "illinois_map.rds")
 ```
 
 ```{r, include = FALSE}
 source("../R/cleaning_data.R")
 
 #obtaining our data tables
+filtered_store_locations_tbl <- readRDS(file = "filtered_store_locations_tbl.rds")
 top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
 ```
 
@@ -50,6 +58,8 @@ source("../R/cleaned_data.R")
 #obtaining our data tables
 sales_tbl <- readRDS(file = "sales_tbl.rds")
 sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
+average_tbl <- readRDS(file = "average_tbl.rds")
+revenue_store <- readRDS(file = "revenue_store.rds")
 ```
 
 ```{r, include = FALSE}
@@ -106,20 +116,16 @@ Sidebar {.sidebar}
 ``` {r}
 #Inputs
 checkboxGroupButtons(inputId = "Cereal_brand",
-                   label = h4("Select Cereal Brands:"),
-                   choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
-                   selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
-                   direction = "vertical")
+                     label = h4("Select Cereal Brands:"),
+                     choices = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                     selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"),
+                     direction = "vertical")
 
-dateRangeInput(inputId = "Date_Range",
-          label = h4("Date Selection:"),
-          start = 1989-09-14,
-          end = 1997-05-14,
-          min = min(sales_tbl$start),
-          max = max(sales_tbl$end),
-          format = "yyyy-mm-dd",
-          startview = "month",
-          weekstart = 4)
+checkboxGroupButtons(inputId = "Year_choosen",
+                     label = h4("Year Selected:"),
+                     choices = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"),
+                     selected = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"),
+                     direction = "vertical")
 ```
 
 ```{r}
@@ -129,15 +135,14 @@ actionButton(inputId = "reset",
              icon = icon("sync"))
 
 observeEvent(eventExpr = input$reset, handlerExpr = {
-  
   updateCheckboxGroupButtons(session = session,
                            inputId = "Cereal_brand",
                            selected = c("Wheaties", "Cinnamon Toast Crunch", "Kix"))
   
-  updateDateInput(session = session,
-                  inputId = "Date_Range",
-                  start = min(sales_tbl$start),
-                  end = max(sales_tbl$end))
+  updateDateRangeInput(session = session,
+                       inputId = "Year_choosen",
+                       selected = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"))
+  
 })
 ```
 
@@ -152,15 +157,15 @@ Row
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
-#total_revenue <- reactive({
-#  sales_tbl %>%
-#  filter(sales, quantity, price) %>%
-#  mutate(revenue = price * sales / quantity) %>%
-#  filter(revenue )
-#})
-
-# Help !!
-
+renderValueBox({
+  valueBox(
+    compute_total_revenue <- revenue_store %>%
+      filter(description %in% input$Cereal_brand) %>%
+        filter(`year(start)` %in% input$Year_choosen) %>%
+      select(sum_revenue)
+  )
+  
+})
 ```
 
 ### Total Quantity Sold {.value-box}

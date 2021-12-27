@@ -371,13 +371,9 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # illinois_map <- input_illinois_map(illinois_map_path)
 #
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
-# 
 # sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl)
-# 
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
-#
 # average_tbl <- get_average(sales_tbl)
-#
 # revenue_store <- get_revenue_store(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")

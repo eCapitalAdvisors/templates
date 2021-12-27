@@ -71,6 +71,13 @@ input_dates <- function() {
   dates_tbl <- data.frame(week = week, start = start, end = end)
 }
 
+input_illinois_map <- function(illinois_map_path) {
+  
+  illinois_map <- geojson_read(illinois_map_path, what = "sp")
+  
+  saveRDS(object = illinois_map, file = "illinois_map.rds")
+}
+
 get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
   
   filtered_store_locations_tbl <- store_locations_tbl %>%
