@@ -157,15 +157,15 @@ Row
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
-compute_total_revenue <- reactive({ revenue_store %>%
-  filter(description %in% input$Cereal_brand) %>%
-    filter(`year(start)` %in% input$Year_choosen)
-})
-
 renderValueBox({
-  shinydashboard::valueBox(value = compute_total_revenue(), icon = "dollar-sign")
+  valueBox(
+    compute_total_revenue <- revenue_store %>%
+      filter(description %in% input$Cereal_brand) %>%
+        filter(`year(start)` %in% input$Year_choosen) %>%
+      select(sum_revenue)
+  )
+  
 })
-
 ```
 
 ### Total Quantity Sold {.value-box}
