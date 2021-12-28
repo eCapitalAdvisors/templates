@@ -14,6 +14,7 @@ runtime: shiny
 #Shiny
 library(flexdashboard)
 library(shiny)
+library(shinydashboard)
 library(shinyWidgets)
 library(DT)
 
@@ -146,26 +147,29 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 })
 ```
 
-Row
+Row {data-width = 500}
 ----------------------------------------------
 
 ### Data Overview
 
+
 ### Total Revenue {.value-box}
 
-``` {r}
+``` {r, echo = FALSE}
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
+total_revenue <- reactive({
+  compute_total_revenue <- revenue_store %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(`year(start)` %in% input$Year_choosen) %>%
+    select(sum_revenue)
+  })
+
 renderValueBox({
-  valueBox(
-    compute_total_revenue <- revenue_store %>%
-      filter(description %in% input$Cereal_brand) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
-      select(sum_revenue)
-  )
-  
+  valueBox(total_revenue())
 })
+  
 ```
 
 ### Total Quantity Sold {.value-box}
@@ -181,6 +185,18 @@ renderValueBox({
 ```{r}
 # avg_unit_price is a reactive expression that computes the avg unit price
 # of the cereals selected over the time frame selected.
+
+avg_unit_price <- reactive({
+  compute_avg_unit_price <- revenue_store %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(`year(start)` %in% input$Year_choosen) %>%
+    select(avg_price)
+  })
+
+renderValueBox({
+  valueBox(avg_unit_price())
+})
+
 ```
 
 
