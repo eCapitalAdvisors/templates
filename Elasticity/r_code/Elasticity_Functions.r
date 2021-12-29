@@ -143,7 +143,7 @@ get_revenue_store <- function(sales_tbl) {
   #get total revenue per year for each store
   revenue_store <- sales_tbl %>%
     group_by(city, description, year(start)) %>%
-    summarise(sum_revenue = sum(price * sales), avg_price = mean(price))
+    summarise(sum_revenue = sum(price * sales), sum_sales = sum(sales), avg_price = mean(price))
 }
 
 plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
