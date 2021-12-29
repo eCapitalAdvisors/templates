@@ -14,6 +14,7 @@ runtime: shiny
 #Shiny
 library(flexdashboard)
 library(shiny)
+library(shinydashboard)
 library(shinyWidgets)
 library(DT)
 
@@ -124,8 +125,13 @@ checkboxGroupButtons(inputId = "Cereal_brand",
 checkboxGroupButtons(inputId = "Year_choosen",
                      label = h4("Year Selected:"),
                      choices = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"),
-                     selected = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"),
-                     direction = "vertical")
+                     selected = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"))
+
+selectInput(inputId = "Store_location",
+           label = h4("Select Store Location:"), 
+           choices = revenue_store %>% distinct(city),
+           multiple = TRUE
+)
 ```
 
 ```{r}
@@ -143,36 +149,53 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
                        inputId = "Year_choosen",
                        selected = c("1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997"))
   
+  updateSelectInput(session = session,
+                    inputId = "Store_location",
+                    selected = NULL)
+  
 })
 ```
 
-Row
+Column
 ----------------------------------------------
-
-### Data Overview
 
 ### Total Revenue {.value-box}
 
-``` {r}
+``` {r, echo = FALSE}
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
-renderValueBox({
-  valueBox(
-    compute_total_revenue <- revenue_store %>%
-      filter(description %in% input$Cereal_brand) %>%
+total_revenue <- reactive({
+  compute_total_revenue <- revenue_store %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(city %in% input$Store_location) %>%
         filter(`year(start)` %in% input$Year_choosen) %>%
-      select(sum_revenue)
-  )
-  
+    select(sum_revenue)
+  })
+
+renderValueBox({
+  valueBox(total_revenue())
 })
+  
 ```
 
 ### Total Quantity Sold {.value-box}
 
 ```{r}
-# total_quantity_sold is a reactive expression that computes the total quantity sold
+# total_sales is a reactive expression that computes the total quantity sold
 # of the cereals selected in the time frame selected.
+
+total_sales <- reactive({
+  compute_total_sales <- revenue_store %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(city %in% input$Store_location) %>%
+        filter(`year(start)` %in% input$Year_choosen) %>%
+    select(sum_sales)
+  })
+
+renderValueBox({
+  valueBox(total_sales())
+})
 
 ```
 
@@ -181,8 +204,42 @@ renderValueBox({
 ```{r}
 # avg_unit_price is a reactive expression that computes the avg unit price
 # of the cereals selected over the time frame selected.
+
+avg_unit_price <- reactive({
+  compute_avg_unit_price <- revenue_store %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(city %in% input$Store_location) %>%
+        filter(`year(start)` %in% input$Year_choosen) %>%
+    select(avg_price)
+  })
+
+renderValueBox({
+  valueBox(avg_unit_price())
+})
+
 ```
 
+
+Column
+----------------------------------------------
+
+```{r}
+
+# Scatter Plot
+dataset <- reactive({
+  sales_sample_tbl %>%
+    filter(description %in% input$Cereal_brand)
+})
+
+# renderTable(dataset())
+plotlyOutput("scatter_plot")
+
+output$scatter_plot <- renderPlotly({
+  data = dataset()
+  plot_scatter(data)
+})
+
+```
 
 
 Page 3
@@ -232,15 +289,7 @@ Column {data-width = 500}
 ### Elasticity Analysis
 
 ```{r}
-# Reactive Filter - Description
-dataset <- reactive({
-  sales_sample_tbl %>%
-    filter(description %in% input$Cereal_brand)
-})
-```
-
-```{r}
-# Reactive Filter - Alpha Level
+# Bootstrap plot
 reactive_alpha <- reactive({
   new_ci_tbl <- bootstrap_tbl %>%
     group_by(term) %>%
@@ -254,21 +303,6 @@ reactive_alpha <- reactive({
     unnest(perc_ci)
 })
 
-```
-
-```{r} 
-# Scatter Plot
-# renderTable(dataset())
-plotlyOutput("scatter_plot")
-
-output$scatter_plot <- renderPlotly({
-  data = dataset()
-  plot_scatter(data)
-})
-```
-
-```{r}
-# Bootstrap plot
 # renderTable(reactive_alpha())
 plotlyOutput("bootstrap_plot")
 
