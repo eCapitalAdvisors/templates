@@ -130,12 +130,13 @@ get_sales_sample <- function(sales_tbl){
     sample_n(1000)
 }
 
-get_average <- function(sales_tbl) {
+get_total <- function(sales_tbl) {
   
   #get average for revenue and prices
-  average_tbl <- sales_tbl %>%
-    group_by(description, year(start)) %>%
-    summarize(avg_revenue = mean(price * sales), avg_price = mean(price))
+  total_tbl <- sales_tbl %>%
+    group_by(city, description, year(start)) %>%
+    summarize(total_revenue = sum(price * sales), avg_price = mean(price)) %>%
+    select(description, `year(start)`, total_revenue)
 }
 
 get_revenue_store <- function(sales_tbl) {
@@ -262,11 +263,20 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-plot_avg_revenue_line <- function(average_tbl) {
-  ggplot(data = average_tbl, aes(x = `year(start)`, y = avg_revenue, color = description)) +
+plot_total_revenue_bar <- function(total_tbl) {
+  ggplot(data = total_tbl, aes(x = city, y = total_revenue, color = description)) +
     geom_line() +
     geom_point() +
-    labs(title = "Average Revenue per Year", x = "Year", y = "Average Revenue") +
+    labs(title = "Total Revenue by City", x = "City", y = "Total Revenue") +
+    guides(color = guide_legend("Brand Name")) +
+    theme(plot.title = element_text(hjust = .5, face = "bold"))
+}
+
+plot_total_revenue_line <- function(total_tbl) {
+  ggplot(data = total_tbl, aes(x = `year(start)`, y = total_revenue, color = description)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +
     guides(color = guide_legend("Brand Name")) +
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
@@ -373,7 +383,7 @@ plot_bootstrap <- function(bootstrap_tbl) {
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl)
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
-# average_tbl <- get_average(sales_tbl)
+# total_tbl <- get_total(sales_tbl)
 # revenue_store <- get_revenue_store(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")

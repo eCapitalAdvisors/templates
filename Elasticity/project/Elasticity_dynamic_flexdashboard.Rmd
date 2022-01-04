@@ -156,7 +156,7 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 })
 ```
 
-Column
+Row
 ----------------------------------------------
 
 ### Total Revenue {.value-box}
@@ -220,27 +220,83 @@ renderValueBox({
 ```
 
 
-Column
+Row
 ----------------------------------------------
 
-```{r}
+### Violin Plot
 
-# Scatter Plot
+```{r}
+# dataset is a reactive expression that interacts with cereal brands, dates, and store prices & sales.
+
 dataset <- reactive({
-  sales_sample_tbl %>%
-    filter(description %in% input$Cereal_brand)
+  sales_tbl %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(city %in% input$Store_location) %>%
+        filter(year(start) %in% input$Year_choosen) %>%
+    select(sales, price)
 })
 
 # renderTable(dataset())
-plotlyOutput("scatter_plot")
 
-output$scatter_plot <- renderPlotly({
+# Violin Plot for Sales
+plotlyOutput("violin_sales_plot")
+
+output$violin_sales_plot <- renderPlotly({
   data = dataset()
-  plot_scatter(data)
+  plot_violin_sales(data, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 })
 
+# Violon Plot for Prices
+
+plotlyOutput("violin_price_plot")
+
+output$violin_price_plot <- renderPlotly({
+  data = dataset()
+  plot_violin_price(data, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+})
 ```
 
+Row
+----------------------------------------------
+
+### Bar Graph
+
+```{r}
+# total_dataset is a reactive expression that interacts with cereal brands, dates, and store prices & sales.
+
+total_dataset <- reactive({
+  total_tbl %>%
+    filter(description %in% input$Cereal_brand) %>%
+      filter(city %in% input$Store_location) %>%
+        filter(year(start) %in% input$Year_choosen) %>%
+    select(sales, price)
+})
+
+# renderTable(total_dataset())
+
+# Bar Graph of Revenue by City
+plotlyOutput("bar_revenue_plot")
+
+output$bar_revenue_plot <- renderPlotly({
+  total = total_dataset()
+  plot_total_revenue_bar(total)
+})
+```
+
+Row
+----------------------------------------------
+
+### Line Graph
+
+```{r}
+# Line Graph of Revenue by Time
+plotlyOutput("line_revenue_plot")
+
+output$line_revenue_plot <- renderPlotly({
+  total = total_dataset()
+  plot_total_revenue_line(total)
+})
+```
 
 Page 3
 ==============================================
