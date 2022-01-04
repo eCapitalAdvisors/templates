@@ -1,6 +1,5 @@
 ---
 title: "Price Elasticity Analysis"
-date: "12/06/2021"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -159,22 +158,27 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
 Row
 ----------------------------------------------
 
-### Total Revenue {.value-box}
-
-``` {r, echo = FALSE}
+```{r}
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
 total_revenue <- reactive({
-  compute_total_revenue <- revenue_store %>%
+  revenue_store %>%
     filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
+    filter(city %in% input$Store_location) %>%
+    filter(`year(start)` %in% input$Year_choosen) %>%
     select(sum_revenue)
   })
 
+renderPrint(total_revenue())
+```
+
+### Total Revenue
+
+``` {r}
+
 renderValueBox({
-  valueBox(total_revenue())
+  valueBox(values = total_revenue())
 })
   
 ```
