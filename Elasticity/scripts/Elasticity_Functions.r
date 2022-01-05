@@ -146,7 +146,7 @@ get_store_locations <-
     filtered_store_locations_tbl <- store_locations_tbl %>%
       left_join(us_locations_tbl)
     
-    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations.rds")
+    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")
   }
 
 # this table discovers the three brands that have the most data in the dataset
