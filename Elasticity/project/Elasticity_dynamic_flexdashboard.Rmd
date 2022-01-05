@@ -10,6 +10,9 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+
+# 1.0 LIBRARIES ----
+
 #Shiny
 library(flexdashboard)
 library(shiny)
@@ -26,75 +29,66 @@ library(readxl)
 ```
 
 ```{r}
+
+# 1.1 LOADING DATA ----
+
 #sourcing my code
 source("../R/cleaning_data.R")
+source("../R/map_template.R")
+source("../R/joining_tables.R")
 
 #importing data
 descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
 prices_path <- "../data/raw_data_cereal_prices.xlsx"
-store_locations_path <- "demo.dta"
-us_locations_path <- "uszips.xlsx"
+store_locations_path <- "../data/demo.dta"
+us_locations_path <- "../data/uszips.xlsx"
 illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 
-descriptions_tbl <- readRDS(file = "descriptions_tbl.rds")
-prices_tbl <- readRDS(file = "prices_tbl.rds")
-store_locations_tbl <- readRDS(file = "store_locations_tbl.rds")
-us_locations_tbl <- readRDS(file = "us_locations_tbl.rds")
-dates_tbl <- readRDS(file = "dates_tbl.rds")
-illinois_map <- readRDS(file = "illinois_map.rds")
+descriptions_tbl <- readRDS(file = "../R/descriptions_tbl.rds")
+prices_tbl <- readRDS(file = "../R/prices_tbl.rds")
+us_locations_tbl <- readRDS(file = "../R/us_locations_tbl.rds")
+dates_tbl <- readRDS(file = "../R/dates_tbl.rds")
+
+store_locations_tbl <- readRDS(file = "../R/store_locations_tbl.rds")
+illinois_map <- readRDS(file = "../R/illinois_map.rds")
 ```
 
 ```{r, include = FALSE}
-source("../R/cleaning_data.R")
+source("../R/joining_tables.R")
 
 #obtaining our data tables
-filtered_store_locations_tbl <- readRDS(file = "filtered_store_locations_tbl.rds")
-top_three_brands_tbl <- readRDS(file = "top_three_brands_tbl.rds")
+filtered_store_locations_tbl <- readRDS(file = "../R/filtered_store_locations_tbl.rds")
+top_three_brands_tbl <- readRDS(file = "../R/top_three_brands_tbl.rds")
 ```
 
 ```{r, include = FALSE}
-source("../R/cleaned_data.R")
+source("../R/joining_tables.R")
+source("../R/modified_datasets.R")
 
 #obtaining our data tables
-sales_tbl <- readRDS(file = "sales_tbl.rds")
-sales_sample_tbl <- readRDS(file = "sales_sample_tbl.rds")
-average_tbl <- readRDS(file = "average_tbl.rds")
-revenue_store <- readRDS(file = "revenue_store.rds")
-```
-
-```{r, include = FALSE}
-#source code to plot the boxplot
-source("../R/plot_boxplot.R")
+sales_tbl <- readRDS(file = "../R/sales_tbl.rds")
+sales_sample_tbl <- readRDS(file = "../R/sales_sample_tbl.rds")
+total_tbl <- readRDS(file = "../R/total_tbl.rds")
 ```
 
 ```{r, include = FALSE}
 #source code to plot the violin plot
-source("../R/plot_violin.R")
-```
-
-```{r, include = FALSE}
-#source code to plot the histogram
-source("../R/plot_histogram.R")
-```
-
-```{r, include = FALSE}
-#source code to plot the scatter plot
-source("../R/plot_scatter.R")
+source("../R/visual_understand_data.R")
 ```
 
 ```{r, include = FALSE}
 #source code to plot the fitted vs residual
-source("../R/plot_fitted_vs_residual.R")
+source("../R/visual_elasticity_analysis.R")
 ```
 
 ```{r, include = FALSE}
 #source code to plot the bootstrap
-source("../R/plot_bootstrap.R")
+source("../R/visual_understand_data.R")
 ```
 
 ```{r, include = FALSE}
 #source code to obtain a bootstrap and CI
-source("../R/get_bootstrap_and_ci.R")
+source("../R/creation_of_model.R")
 
 bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
 ci <- readRDS(file = "ci.rds")
