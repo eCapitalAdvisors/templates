@@ -10,6 +10,9 @@ runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
+
+# 1.0 LIBRARIES ----
+
 #Shiny
 library(flexdashboard)
 library(shiny)
@@ -26,14 +29,17 @@ library(readxl)
 ```
 
 ```{r}
+
+# 1.1 LOADING DATA ----
+
 #sourcing my code
 source("../R/cleaning_data.R")
 
 #importing data
 descriptions_path <- "../data/raw_data_cereal_descriptions.xlsx"
 prices_path <- "../data/raw_data_cereal_prices.xlsx"
-store_locations_path <- "demo.dta"
-us_locations_path <- "uszips.xlsx"
+store_locations_path <- "../data/demo.dta"
+us_locations_path <- "../data/uszips.xlsx"
 illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 
 descriptions_tbl <- readRDS(file = "descriptions_tbl.rds")

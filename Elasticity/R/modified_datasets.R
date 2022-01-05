@@ -5,7 +5,7 @@ function(sales_tbl) {
     group_by(description) %>%
     sample_n(1000)
   
-  return(sales_sample_tbl)
+  saveRDS(object = sales_sample_tbl, file = "../R/sales_sample_tbl.rds")
 }
 get_total <-
 function(sales_tbl) {
@@ -23,5 +23,5 @@ function(sales_tbl) {
            avg_price,
            sum_sales)
   
-  return(total_tbl)
+  saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
 }

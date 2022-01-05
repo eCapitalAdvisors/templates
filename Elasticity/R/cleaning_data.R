@@ -10,10 +10,9 @@ function(descriptions_path) {
         `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch",
         `KIX` = "Kix",
         `WHEATIES` = "Wheaties"
-      )
-    )
+      ))
   
-  return(descriptions_tbl)
+  saveRDS(object = descriptions_tbl, file = "../R/descriptions_tbl.rds")
 }
 input_prices <-
 function(prices_path) {
@@ -29,7 +28,7 @@ function(prices_path) {
       price = PRICE
     )
   
-  return(prices_tbl)
+  saveRDS(object = prices_tbl, file = "../R/prices_tbl.rds")
 }
 input_us_locations <-
 function(us_locations_path) {
@@ -37,7 +36,7 @@ function(us_locations_path) {
   us_locations_tbl <- read_excel(us_locations_path) %>%
     select(zip, state_name)
   
-  return(us_locations_tbl)
+  saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
 }
 input_dates <-
 function() {
@@ -62,5 +61,6 @@ function() {
   dates_tbl <- data.frame(week = week,
                           start = start,
                           end = end)
-  return(dates_tbl)
+  
+  saveRDS(object = dates_tbl, file = "../R/dates_tbl.rds")
 }

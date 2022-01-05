@@ -55,10 +55,9 @@ input_descriptions <- function(descriptions_path) {
         `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch",
         `KIX` = "Kix",
         `WHEATIES` = "Wheaties"
-      )
-    )
+      ))
   
-  return(descriptions_tbl)
+  saveRDS(object = descriptions_tbl, file = "../R/descriptions_tbl.rds")
 }  
 
 # selecting the variables of choice, renaming the variable names
@@ -75,7 +74,7 @@ input_prices <- function(prices_path) {
       price = PRICE
     )
   
-  return(prices_tbl)
+  saveRDS(object = prices_tbl, file = "../R/prices_tbl.rds")
 }
 
 # selecting the variables of choice, changing the format of the data
@@ -85,12 +84,10 @@ input_store_locations <- function(store_locations_path) {
     select(city, zip, lat, long, store) %>%
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
-    filter(!is.na(zip)) %>%
-    filter(!is.na(store)) %>%
     mutate(lat = format(lat / 10000, nsmall = 4)) %>%
     mutate(long = format(long / 10000, nsmall = 4))
   
-  return(store_locations_tbl)
+  saveRDS(object = store_locations_tbl, file = "../R/store_locations_tbl.rds")
 }
 
 # selecting variables of choice
@@ -99,10 +96,10 @@ input_us_locations <- function(us_locations_path) {
   us_locations_tbl <- read_excel(us_locations_path) %>%
     select(zip, state_name)
   
-  return(us_locations_tbl)
+  saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
 }
 
-# creating a function to go along with the data according to Domick's manual
+# creating a function to go along with the data according to Dominick's manual
 input_dates <- function() {
   d <- as_date(7196)
   e <- as_date(7202)
@@ -125,16 +122,20 @@ input_dates <- function() {
   dates_tbl <- data.frame(week = week,
                           start = start,
                           end = end)
-  return(dates_tbl)
+  
+  saveRDS(object = dates_tbl, file = "../R/dates_tbl.rds")
 }
+
 
 # 2.2 Creating a Map Template ----
 
 # reading in a map from online
 input_illinois_map <- function(illinois_map_path) {
   illinois_map <- geojson_read(illinois_map_path, what = "sp")
-  return(illinois_map)
+  
+  saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
 }
+
 
 # 2.3 Joining the Tables ----
 
@@ -145,7 +146,7 @@ get_store_locations <-
     filtered_store_locations_tbl <- store_locations_tbl %>%
       left_join(us_locations_tbl)
     
-    return(filtered_store_locations_tbl)
+    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations.rds")
   }
 
 # this table discovers the three brands that have the most data in the dataset
@@ -159,8 +160,9 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
     filter(total_count > 1000) %>%
     slice_max(total_count, n = 3)
   
-  return(top_three_brands_tbl)
+  saveRDS(object = top_three_brands_tbl, file = "../R/top_three_brands_tbl.rds")
 }
+
 
 # this table joins all the relevant tables
 get_sales <-
@@ -187,8 +189,9 @@ get_sales <-
              state_name) %>%
       mutate(revenue = price * sales)
     
-    return(sales_tbl)
+    saveRDS(object = top_three_brands_tbl, file = "../R/sales_tbl.rds")
   }
+
 
 # 2.4 Modified Datasets ----
 
@@ -199,7 +202,7 @@ get_sales_sample <- function(sales_tbl) {
     group_by(description) %>%
     sample_n(1000)
   
-  return(sales_sample_tbl)
+  saveRDS(object = sales_sample_tbl, file = "../R/sales_sample_tbl.rds")
 }
 
 # this table is for the visuals; it contains descriptive data
@@ -218,8 +221,9 @@ get_total <- function(sales_tbl) {
            avg_price,
            sum_sales)
   
-  return(total_tbl)
+  saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
 }
+
 
 # 2.5 Save Functions ----
 
@@ -266,7 +270,14 @@ get_ci_for_bootstrap <- function(bootstrap_tbl) {
     )) %>%
     unnest(perc_ci)
   
+  saveRDS(object = ci, file = "ci.rds")
 }
+
+# 3.2 Save Functions ----
+
+dump(c("get_bootstrap", "get_ci_for_bootstrap"),
+     file = "../R/creation_of_model.R")
+
 
 # 4.0 VISUALS: UNDERSTAND THE DATA ----
 
@@ -373,6 +384,13 @@ plot_bootstrap <- function(bootstrap_tbl) {
   ggplotly(p)
 }
 
+# 4.1 Save Functions ----
+
+dump(c("plot_boxplot_sales", "plot_boxplot_price", "plot_histogram_sales", 
+       "plot_histogram_price", "plot_scatter", "plot_bootstrap"),
+     file = "../R/visual_understand_data.R")
+
+
 # 5.0 VISUALS: OVERVIEW OF THE DATA ----
 
 plot_violin_sales <- function(sales_tbl, x_title, y_title, title_chart) {
@@ -425,6 +443,13 @@ ggplot() +
   theme_void() +
   coord_map()
 
+# 5.1 Save Functions ----
+
+dump(c("plot_boxplot_sales", "plot_boxplot_price", "plot_histogram_sales", 
+       "plot_histogram_price", "plot_scatter", "plot_bootstrap"),
+     file = "../R/visual_understand_data.R")
+
+
 # 6.0 VISUALS: ELASTICITY ANALYSIS ----
 
 plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "ML") {
@@ -453,6 +478,11 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
     ggplotly(p)
   }
 }
+
+# 6.1 Save Functions ----
+
+dump("plot_fitted_vs_residual",
+     file = "../R/visual_elasticity_analysis.R")
 
 
 # # Testing Functions ----
