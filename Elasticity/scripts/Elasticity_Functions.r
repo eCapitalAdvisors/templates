@@ -221,9 +221,24 @@ get_total <- function(sales_tbl) {
   return(total_tbl)
 }
 
+# 2.5 Save Functions ----
+
+dump(c("input_descriptions", "input_prices", "input_us_locations", "input_dates"),
+     file = "../R/cleaning_data.R")
+
+dump("input_illinois_map",
+     file = "../R/map_template.R")
+
+dump(c("get_store_locations", "get_top_three", "get_sales"),
+     file = "../R/joining_tables.R")
+
+dump(c("get_sales_sample", "get_total"),
+     file = "../R/modified_datasets.R")
+
+
 # 3.0 BOOTSTRAP MODEL ----
 
-# 3.1 CREATE MODEL ----
+# 3.1 Create Model ----
 
 get_bootstrap <- function(sales_tbl) {
   
@@ -401,8 +416,6 @@ plot_total_revenue_line <- function(total_tbl) {
     guides(color = guide_legend("Brand Name")) +
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
-
-# the revenue tbl needs to visualize how much each location sells a year
 
 illinois_map_fortified <- tidy(illinois_map)
 
