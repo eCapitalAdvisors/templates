@@ -6,6 +6,8 @@ function(sales_tbl) {
     sample_n(1000)
   
   saveRDS(object = sales_sample_tbl, file = "../R/sales_sample_tbl.rds")
+  
+  return(sales_sample_tbl)
 }
 get_total <-
 function(sales_tbl) {
@@ -24,4 +26,6 @@ function(sales_tbl) {
            sum_sales)
   
   saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
+  
+  return(total_tbl)
 }

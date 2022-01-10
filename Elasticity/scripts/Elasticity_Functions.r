@@ -17,6 +17,7 @@
 # standard
 library(tidyverse)
 library(broom)
+library(rsample) #bootstrap function
 library(infer)
 library(lubridate)
 library(readxl)
@@ -32,11 +33,11 @@ library(ggrepel)
 
 ## Read Data
 
-# descriptions_path <- "raw_data_cereal_descriptions.xlsx"
-# prices_path <- "raw_data_cereal_prices.xlsx"
-# store_locations_path <- "demo.dta"
-# us_locations_path <- "uszips.xlsx"
-# illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
+descriptions_path <- "raw_data_cereal_descriptions.xlsx"
+prices_path <- "raw_data_cereal_prices.xlsx"
+store_locations_path <- "demo.dta"
+us_locations_path <- "uszips.xlsx"
+illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
 
 
 # 2.0 PREPROCESS DATA ----
@@ -58,6 +59,8 @@ input_descriptions <- function(descriptions_path) {
       ))
   
   saveRDS(object = descriptions_tbl, file = "../R/descriptions_tbl.rds")
+  
+  return(descriptions_tbl)
 }  
 
 # selecting the variables of choice, renaming the variable names
@@ -75,6 +78,8 @@ input_prices <- function(prices_path) {
     )
   
   saveRDS(object = prices_tbl, file = "../R/prices_tbl.rds")
+  
+  return(prices_tbl)
 }
 
 # selecting the variables of choice, changing the format of the data
@@ -88,6 +93,8 @@ input_store_locations <- function(store_locations_path) {
     mutate(long = format(long / 10000, nsmall = 4))
   
   saveRDS(object = store_locations_tbl, file = "../R/store_locations_tbl.rds")
+  
+  return(store_locations_tbl)
 }
 
 # selecting variables of choice
@@ -97,6 +104,8 @@ input_us_locations <- function(us_locations_path) {
     select(zip, state_name)
   
   saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
+  
+  return(us_locations_tbl)
 }
 
 # creating a function to go along with the data according to Dominick's manual
@@ -124,6 +133,8 @@ input_dates <- function() {
                           end = end)
   
   saveRDS(object = dates_tbl, file = "../R/dates_tbl.rds")
+  
+  return(dates_tbl)
 }
 
 
@@ -134,6 +145,8 @@ input_illinois_map <- function(illinois_map_path) {
   illinois_map <- geojson_read(illinois_map_path, what = "sp")
   
   saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
+  
+  return(illinois_map)
 }
 
 
@@ -147,6 +160,8 @@ get_store_locations <-
       left_join(us_locations_tbl)
     
     saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")
+    
+    return(filtered_store_locations_tbl)
   }
 
 # this table discovers the three brands that have the most data in the dataset
@@ -161,6 +176,8 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
     slice_max(total_count, n = 3)
   
   saveRDS(object = top_three_brands_tbl, file = "../R/top_three_brands_tbl.rds")
+  
+  return(top_three_brands_tbl)
 }
 
 
@@ -190,6 +207,8 @@ get_sales <-
       mutate(revenue = price * sales)
     
     saveRDS(object = top_three_brands_tbl, file = "../R/sales_tbl.rds")
+    
+    return(sales_tbl)
   }
 
 
@@ -203,6 +222,8 @@ get_sales_sample <- function(sales_tbl) {
     sample_n(1000)
   
   saveRDS(object = sales_sample_tbl, file = "../R/sales_sample_tbl.rds")
+  
+  return(sales_sample_tbl)
 }
 
 # this table is for the visuals; it contains descriptive data
@@ -222,6 +243,8 @@ get_total <- function(sales_tbl) {
            sum_sales)
   
   saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
+  
+  return(total_tbl)
 }
 
 
@@ -246,36 +269,44 @@ dump(c("get_sales_sample", "get_total"),
 
 get_bootstrap <- function(sales_tbl) {
   
-  # obtain betas for bootstrap
-  bootstrap_tbl <- sales_tbl %>%
+  # bootstrap
+  sales_tbl %>%
     mutate(sales = log(sales), price = log(price)) %>%
-    specify(formula = sales ~ price + description) %>%
+    specify(formula = sales ~ price) %>%
     generate(reps = 1000, type = "bootstrap") %>%
-    fit()
-  
-  saveRDS(object = bootstrap_tbl, file = "bootstrap_tbl.rds")
+    calculate(stat = "slope")
 }
 
+get_betas <- function(sales_tbl) {
+  
+  # obtain betas
+  bootstrap_tbl <- sales_tbl %>%
+    group_by(description) %>%
+    nest() %>%
+    mutate(bootstrap_slopes = purrr::map(data, get_bootstrap))
+  
+  saveRDS(object = bootstrap_tbl, file = "../R/bootstrap_tbl.rds")
+  
+  return(bootstrap_tbl)
+}
+  
 # obtain confidence interval for bootstrap
 get_ci_for_bootstrap <- function(bootstrap_tbl) {
   
   ci <- bootstrap_tbl %>%
-    group_by(term) %>%
-    nest() %>%
-    mutate(perc_ci = map(
-      data,
-      get_confidence_interval,
-      level = 0.95,
-      type = "percentile"
-    )) %>%
+    mutate(perc_ci = purrr::map(bootstrap_slopes, get_confidence_interval, level = 0.95, type = 'percentile')) %>%
     unnest(perc_ci)
   
-  saveRDS(object = ci, file = "ci.rds")
+  saveRDS(object = ci, file = "../R/ci.rds")
+  
+  return(ci)
 }
+
+ci <- get_ci_for_bootstrap(bootstrap_tbl)
 
 # 3.2 Save Functions ----
 
-dump(c("get_bootstrap", "get_ci_for_bootstrap"),
+dump(c("get_bootstrap", "get_betas", "get_ci_for_bootstrap"),
      file = "../R/creation_of_model.R")
 
 

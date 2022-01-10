@@ -4,7 +4,9 @@ function(store_locations_tbl, us_locations_tbl) {
     filtered_store_locations_tbl <- store_locations_tbl %>%
       left_join(us_locations_tbl)
     
-    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations.rds")
+    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")
+    
+    return(filtered_store_locations_tbl)
   }
 get_top_three <-
 function(descriptions_tbl, prices_tbl) {
@@ -17,6 +19,8 @@ function(descriptions_tbl, prices_tbl) {
     slice_max(total_count, n = 3)
   
   saveRDS(object = top_three_brands_tbl, file = "../R/top_three_brands_tbl.rds")
+  
+  return(top_three_brands_tbl)
 }
 get_sales <-
 function(descriptions_tbl,
@@ -43,4 +47,6 @@ function(descriptions_tbl,
       mutate(revenue = price * sales)
     
     saveRDS(object = top_three_brands_tbl, file = "../R/sales_tbl.rds")
+    
+    return(sales_tbl)
   }

@@ -13,6 +13,8 @@ function(descriptions_path) {
       ))
   
   saveRDS(object = descriptions_tbl, file = "../R/descriptions_tbl.rds")
+  
+  return(descriptions_tbl)
 }
 input_prices <-
 function(prices_path) {
@@ -29,6 +31,8 @@ function(prices_path) {
     )
   
   saveRDS(object = prices_tbl, file = "../R/prices_tbl.rds")
+  
+  return(prices_tbl)
 }
 input_us_locations <-
 function(us_locations_path) {
@@ -37,6 +41,8 @@ function(us_locations_path) {
     select(zip, state_name)
   
   saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
+  
+  return(us_locations_tbl)
 }
 input_dates <-
 function() {
@@ -63,4 +69,6 @@ function() {
                           end = end)
   
   saveRDS(object = dates_tbl, file = "../R/dates_tbl.rds")
+  
+  return(dates_tbl)
 }
