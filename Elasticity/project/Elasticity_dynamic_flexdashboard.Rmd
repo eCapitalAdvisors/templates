@@ -90,8 +90,8 @@ source("../R/visual_understand_data.R")
 #source code to obtain a bootstrap and CI
 source("../R/creation_of_model.R")
 
-bootstrap_tbl <- readRDS(file = "bootstrap_tbl.rds")
-ci <- readRDS(file = "ci.rds")
+bootstrap_tbl <- readRDS(file = "../R/bootstrap_tbl.rds")
+ci <- readRDS(file = "../R/ci.rds")
 ```
 
 
