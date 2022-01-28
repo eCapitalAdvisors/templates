@@ -46,10 +46,10 @@ illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/il
 
 descriptions_tbl <- readRDS(file = "../R/descriptions_tbl.rds")
 prices_tbl <- readRDS(file = "../R/prices_tbl.rds")
+store_locations_tbl <- readRDS(file = "../R/store_locations_tbl.rds")
 us_locations_tbl <- readRDS(file = "../R/us_locations_tbl.rds")
 dates_tbl <- readRDS(file = "../R/dates_tbl.rds")
 
-store_locations_tbl <- readRDS(file = "../R/store_locations_tbl.rds")
 illinois_map <- readRDS(file = "../R/illinois_map.rds")
 ```
 
@@ -122,7 +122,7 @@ checkboxGroupButtons(inputId = "Year_choosen",
 
 selectInput(inputId = "Store_location",
            label = h4("Select Store Location:"), 
-           choices = revenue_store %>% distinct(city),
+           choices = filtered_store_locations_tbl %>% distinct(city),
            multiple = TRUE
 )
 ```
@@ -157,17 +157,17 @@ Row
 # of the cereals selected in the time frame selected.
 
 total_revenue <- reactive({
-  revenue_store %>%
+  total_tbl %>%
     filter(description %in% input$Cereal_brand) %>%
     filter(city %in% input$Store_location) %>%
     filter(`year(start)` %in% input$Year_choosen) %>%
-    select(sum_revenue)
+    select(`total_revenue`)
   })
 
-renderPrint(total_revenue())
+# renderPrint(total_revenue())
 ```
 
-### Total Revenue
+### Total Revenue {.value-box}
 
 ``` {r}
 
@@ -184,10 +184,10 @@ renderValueBox({
 # of the cereals selected in the time frame selected.
 
 total_sales <- reactive({
-  compute_total_sales <- revenue_store %>%
+  compute_total_sales <- total_tbl %>%
     filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
+    filter(city %in% input$Store_location) %>%
+    filter(`year(start)` %in% input$Year_choosen) %>%
     select(sum_sales)
   })
 
@@ -204,10 +204,10 @@ renderValueBox({
 # of the cereals selected over the time frame selected.
 
 avg_unit_price <- reactive({
-  compute_avg_unit_price <- revenue_store %>%
+  compute_avg_unit_price <- total_tbl %>%
     filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
+    filter(city %in% input$Store_location) %>%
+    filter(`year(start)` %in% input$Year_choosen) %>%
     select(avg_price)
   })
 
@@ -230,7 +230,7 @@ dataset <- reactive({
   sales_tbl %>%
     filter(description %in% input$Cereal_brand) %>%
       filter(city %in% input$Store_location) %>%
-        filter(year(start) %in% input$Year_choosen) %>%
+        filter(`year(start)` %in% input$Year_choosen) %>%
     select(sales, price)
 })
 

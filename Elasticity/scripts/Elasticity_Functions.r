@@ -302,8 +302,6 @@ get_ci_for_bootstrap <- function(bootstrap_tbl) {
   return(ci)
 }
 
-ci <- get_ci_for_bootstrap(bootstrap_tbl)
-
 # 3.2 Save Functions ----
 
 dump(c("get_bootstrap", "get_betas", "get_ci_for_bootstrap"),
