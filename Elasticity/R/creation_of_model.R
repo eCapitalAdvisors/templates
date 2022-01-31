@@ -1,8 +1,8 @@
 get_bootstrap <-
-function(df) {
+function(sales_tbl) {
   
   # bootstrap
-  df %>%
+  sales_tbl %>%
     mutate(sales = log(sales), price = log(price)) %>%
     specify(formula = sales ~ price) %>%
     generate(reps = 1000, type = "bootstrap") %>%
