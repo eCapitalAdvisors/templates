@@ -2,7 +2,7 @@
 title: "Price Elasticity Analysis"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     vertical_layout: scroll
     css: styles-default.css
     logo: logo.png
@@ -171,6 +171,7 @@ total_revenue <- reactive({
 # If something is choosen in the menu, have the revenues added
 
 # Also there is nothing in the tibble...
+# It doesn't like all three variables in the filter()
 
 renderPrint(total_revenue())
 ```
@@ -226,7 +227,7 @@ renderValueBox({
 ```
 
 
-Row
+Column
 ----------------------------------------------
 
 ### Violin Plot
@@ -262,7 +263,7 @@ output$violin_price_plot <- renderPlotly({
 })
 ```
 
-Row
+Column
 ----------------------------------------------
 
 ### Bar Graph
@@ -289,8 +290,6 @@ output$bar_revenue_plot <- renderPlotly({
 })
 ```
 
-Row
-----------------------------------------------
 
 ### Line Graph
 
@@ -354,14 +353,7 @@ Column {data-width = 500}
 # Bootstrap plot
 reactive_alpha <- reactive({
   new_ci_tbl <- bootstrap_tbl %>%
-    group_by(term) %>%
-    nest() %>%
-    mutate(perc_ci = map(
-      data,
-      get_confidence_interval,
-      level = input$alpha,
-      type = "percentile"
-    )) %>%
+    mutate(perc_ci = purrr::map(bootstrap_slopes, get_confidence_interval, level = input$alpha, type = 'percentile')) %>%
     unnest(perc_ci)
 })
 
