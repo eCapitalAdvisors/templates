@@ -159,8 +159,8 @@ Row
 total_revenue <- reactive({
   total_tbl %>%
     filter(
-      description %in% input$Cereal_brand,
-      city %in% input$Store_location,
+      #description %in% input$Cereal_brand,
+      #city %in% input$Store_location,
       `year(start)` %in% input$Year_choosen
     ) %>%
     mutate(revenue = sum(total_revenue)) %>%
@@ -170,9 +170,6 @@ total_revenue <- reactive({
 # If nothing is choosen in the menu, have revenue = 0
 # If something is choosen in the menu, have the revenues added
 
-# Also there is nothing in the tibble...
-# It doesn't like all three variables in the filter()
-
 renderPrint(total_revenue())
 ```
 
@@ -181,7 +178,10 @@ renderPrint(total_revenue())
 ``` {r}
 
 renderValueBox({
-  valueBox(values = total_revenue())
+  valueBox(
+    value = total_revenue(),
+    subtitle = "Revenue"
+    )
 })
   
 ```

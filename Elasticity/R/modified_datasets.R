@@ -15,11 +15,12 @@ function(sales_tbl) {
   total_tbl <- sales_tbl %>%
     group_by(city, description, year(start)) %>%
     summarize(
-      total_revenue = sum(price * sales),
+      total_revenue = sum(revenue),
       avg_price = mean(price),
       sum_sales = sum(sales)
     ) %>%
-    select(description,
+    select(city,
+           description,
            `year(start)`,
            total_revenue,
            avg_price,

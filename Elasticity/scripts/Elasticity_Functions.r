@@ -230,7 +230,7 @@ get_sales_sample <- function(sales_tbl) {
 get_total <- function(sales_tbl) {
   #get total for revenue and average prices
   total_tbl <- sales_tbl %>%
-    #group_by(city, description, year(start)) %>%
+    group_by(city, description, year(start)) %>%
     summarize(
       total_revenue = sum(revenue),
       avg_price = mean(price),
