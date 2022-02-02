@@ -14,17 +14,11 @@ function(sales_tbl) {
   #get total for revenue and average prices
   total_tbl <- sales_tbl %>%
     group_by(city, description, year(start)) %>%
-    summarize(
+    transmute(
       total_revenue = sum(revenue),
       avg_price = mean(price),
       sum_sales = sum(sales)
-    ) %>%
-    select(city,
-           description,
-           `year(start)`,
-           total_revenue,
-           avg_price,
-           sum_sales)
+    )
   
   saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
   
