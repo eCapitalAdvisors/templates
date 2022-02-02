@@ -122,8 +122,8 @@ checkboxGroupButtons(inputId = "Year_choosen",
 
 selectInput(inputId = "Store_location",
            label = h4("Select Store Location:"), 
-           choices = filtered_store_locations_tbl %>% distinct(city),
-           multiple = TRUE
+           choices = c(filtered_store_locations_tbl %>% distinct(city)),
+           selected = "Park Ridge"
 )
 ```
 
@@ -144,7 +144,7 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
   
   updateSelectInput(session = session,
                     inputId = "Store_location",
-                    selected = NULL)
+                    selected = "Park Ridge")
   
 })
 ```
@@ -156,24 +156,24 @@ Row
 # total_revenue is a reactive expression that computes the total revenue
 # of the cereals selected in the time frame selected.
 
-total_revenue <- reactive({
-  total_tbl %>%
+kpi_tbl <- reactive({
+  sales_tbl %>%
     filter(
       description %in% input$Cereal_brand,
       city %in% input$Store_location,
       `year(start)` %in% input$Year_choosen
     ) %>%
-    mutate(revenue = sum(total_revenue)) %>%
-    select(revenue)
+    transmute(
+      total_revenue = sum(revenue),
+      avg_price = mean(price),
+      sum_sales = sum(sales)
+    )
   })
 
 # If nothing is choosen in the menu, have revenue = 0
 # If something is choosen in the menu, have the revenues added
 
-# Also there is nothing in the tibble...
-# It doesn't like all three variables in the filter()
-
-renderPrint(total_revenue())
+renderPrint(kpi_tbl())
 ```
 
 ### Total Revenue {.value-box}
@@ -181,7 +181,10 @@ renderPrint(total_revenue())
 ``` {r}
 
 renderValueBox({
-  valueBox(values = total_revenue())
+  valueBox(
+    value = kpi_tbl() %>% select(total_revenue),
+    subtitle = "Revenue"
+    )
 })
   
 ```
