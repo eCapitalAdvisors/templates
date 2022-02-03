@@ -73,7 +73,7 @@ total_tbl <- readRDS(file = "../R/total_tbl.rds")
 
 ```{r, include = FALSE}
 #source code to plot the violin plot
-source("../R/visual_understand_data.R")
+source("../R/visual_overview_data.R")
 ```
 
 ```{r, include = FALSE}
@@ -122,9 +122,8 @@ checkboxGroupButtons(inputId = "Year_choosen",
 
 selectInput(inputId = "Store_location",
            label = h4("Select Store Location:"), 
-           choices = c(filtered_store_locations_tbl %>% distinct(city)),
-           selected = "Park Ridge"
-)
+           choices = c(sales_tbl %>% distinct(city)),
+           selected = "Addison")
 ```
 
 ```{r}
@@ -144,7 +143,7 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
   
   updateSelectInput(session = session,
                     inputId = "Store_location",
-                    selected = "Park Ridge")
+                    selected = "Addison")
   
 })
 ```
@@ -153,7 +152,7 @@ Row
 ----------------------------------------------
 
 ```{r}
-# total_revenue is a reactive expression that computes the total revenue
+# kpi_tbl is a reactive expression that computes the total revenue, avg price, total sales
 # of the cereals selected in the time frame selected.
 
 kpi_tbl <- reactive({
@@ -161,7 +160,7 @@ kpi_tbl <- reactive({
     filter(
       description %in% input$Cereal_brand,
       city %in% input$Store_location,
-      `year(start)` %in% input$Year_choosen
+      start_year %in% input$Year_choosen
     ) %>%
     transmute(
       total_revenue = sum(revenue),
@@ -170,20 +169,20 @@ kpi_tbl <- reactive({
     )
   })
 
-# If nothing is choosen in the menu, have revenue = 0
-# If something is choosen in the menu, have the revenues added
+# does not respond to `description`
 
-renderPrint(kpi_tbl())
+# renderPrint(kpi_tbl())
 ```
 
 ### Total Revenue {.value-box}
 
-``` {r}
+``` {r .value-box}
 
 renderValueBox({
   valueBox(
-    value = kpi_tbl() %>% select(total_revenue),
-    subtitle = "Revenue"
+    value = kpi_tbl()$total_revenue[1],
+    subtitle = "Revenue",
+    color = "black"
     )
 })
   
@@ -192,19 +191,13 @@ renderValueBox({
 ### Total Quantity Sold {.value-box}
 
 ```{r}
-# total_sales is a reactive expression that computes the total quantity sold
-# of the cereals selected in the time frame selected.
-
-total_sales <- reactive({
-  compute_total_sales <- total_tbl %>%
-    filter(description %in% input$Cereal_brand) %>%
-    filter(city %in% input$Store_location) %>%
-    filter(`year(start)` %in% input$Year_choosen) %>%
-    select(sum_sales)
-  })
 
 renderValueBox({
-  valueBox(total_sales())
+  valueBox(
+    value = kpi_tbl()$sum_sales[1],
+    subtitle = "Quantity Sold",
+    color = "black"
+  )
 })
 
 ```
@@ -212,19 +205,13 @@ renderValueBox({
 ### AVG Unit Price {.value-box}
 
 ```{r}
-# avg_unit_price is a reactive expression that computes the avg unit price
-# of the cereals selected over the time frame selected.
-
-avg_unit_price <- reactive({
-  compute_avg_unit_price <- total_tbl %>%
-    filter(description %in% input$Cereal_brand) %>%
-    filter(city %in% input$Store_location) %>%
-    filter(`year(start)` %in% input$Year_choosen) %>%
-    select(avg_price)
-  })
 
 renderValueBox({
-  valueBox(avg_unit_price())
+  valueBox(
+    value = kpi_tbl()$avg_price[1],
+    subtitle = "Average Price of Cereal",
+    color = "black"
+  )
 })
 
 ```
@@ -240,10 +227,9 @@ Column
 
 dataset <- reactive({
   sales_tbl %>%
-    filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
-    select(sales, price)
+    filter(description %in% input$Cereal_brand,
+           city %in% input$Store_location,
+           start_year %in% input$Year_choosen)
 })
 
 # renderTable(dataset())
@@ -252,17 +238,15 @@ dataset <- reactive({
 plotlyOutput("violin_sales_plot")
 
 output$violin_sales_plot <- renderPlotly({
-  data = dataset()
-  plot_violin_sales(data, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
+  plot_violin_sales(dataset(), "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 })
 
-# Violon Plot for Prices
+# Violin Plot for Prices
 
 plotlyOutput("violin_price_plot")
 
 output$violin_price_plot <- renderPlotly({
-  data = dataset()
-  plot_violin_price(data, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+  plot_violin_price(dataset(), "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 })
 ```
 
