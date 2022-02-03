@@ -73,7 +73,7 @@ total_tbl <- readRDS(file = "../R/total_tbl.rds")
 
 ```{r, include = FALSE}
 #source code to plot the violin plot
-source("../R/visual_understand_data.R")
+source("../R/visual_overview_data.R")
 ```
 
 ```{r, include = FALSE}
@@ -181,7 +181,8 @@ kpi_tbl <- reactive({
 renderValueBox({
   valueBox(
     value = kpi_tbl()$total_revenue[1],
-    subtitle = "Revenue"
+    subtitle = "Revenue",
+    color = "black"
     )
 })
   
@@ -194,7 +195,8 @@ renderValueBox({
 renderValueBox({
   valueBox(
     value = kpi_tbl()$sum_sales[1],
-    subtitle = "Quantity Sold"
+    subtitle = "Quantity Sold",
+    color = "black"
   )
 })
 
@@ -207,7 +209,8 @@ renderValueBox({
 renderValueBox({
   valueBox(
     value = kpi_tbl()$avg_price[1],
-    subtitle = "Average Price of Cereal"
+    subtitle = "Average Price of Cereal",
+    color = "black"
   )
 })
 
@@ -224,10 +227,9 @@ Column
 
 dataset <- reactive({
   sales_tbl %>%
-    filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(`year(start)` %in% input$Year_choosen) %>%
-    select(sales, price)
+    filter(description %in% input$Cereal_brand,
+           city %in% input$Store_location,
+           start_year %in% input$Year_choosen)
 })
 
 # renderTable(dataset())
@@ -236,17 +238,15 @@ dataset <- reactive({
 plotlyOutput("violin_sales_plot")
 
 output$violin_sales_plot <- renderPlotly({
-  data = dataset()
-  plot_violin_sales(data, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
+  plot_violin_sales(dataset(), "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 })
 
-# Violon Plot for Prices
+# Violin Plot for Prices
 
 plotlyOutput("violin_price_plot")
 
 output$violin_price_plot <- renderPlotly({
-  data = dataset()
-  plot_violin_price(data, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
+  plot_violin_price(dataset(), "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")
 })
 ```
 

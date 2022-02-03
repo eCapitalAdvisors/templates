@@ -466,17 +466,16 @@ plot_total_revenue_line <- function(total_tbl) {
 
 illinois_map_fortified <- tidy(illinois_map)
 
-ggplot() +
-  geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
-  geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
-  theme_void() +
-  coord_map()
+# ggplot() +
+#   geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
+#   geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
+#   theme_void() +
+#   coord_map()
 
 # 5.1 Save Functions ----
 
-dump(c("plot_boxplot_sales", "plot_boxplot_price", "plot_histogram_sales", 
-       "plot_histogram_price", "plot_scatter", "plot_bootstrap"),
-     file = "../R/visual_understand_data.R")
+dump(c("plot_violin_sales", "plot_violin_price", "plot_total_revenue_bar", "plot_total_revenue_line", "illinois_map_fortified"),
+     file = "../R/visual_overview_data.R")
 
 
 # 6.0 VISUALS: ELASTICITY ANALYSIS ----
