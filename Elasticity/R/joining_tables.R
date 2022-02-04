@@ -34,19 +34,21 @@ function(descriptions_tbl,
       inner_join(top_three_brands_tbl) %>%
       inner_join(filtered_store_locations_tbl) %>%
       inner_join(dates_tbl) %>%
+      mutate(revenue = price * sales, start_year = year(start)) %>%
       select(start,
              end,
+             start_year,
              price,
              sales,
+             revenue,
              description,
              city,
              zip,
              lat,
              long,
-             state_name) %>%
-      mutate(revenue = price * sales)
+             state_name)
     
-    saveRDS(object = top_three_brands_tbl, file = "../R/sales_tbl.rds")
+    saveRDS(object = sales_tbl, file = "../R/sales_tbl.rds")
     
     return(sales_tbl)
   }

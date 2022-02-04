@@ -240,7 +240,12 @@ plotlyOutput("violin_sales_plot")
 output$violin_sales_plot <- renderPlotly({
   plot_violin_sales(dataset(), "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 })
+```
 
+Column
+----------------------------------------------
+
+```{r}
 # Violin Plot for Prices
 
 plotlyOutput("violin_price_plot")
