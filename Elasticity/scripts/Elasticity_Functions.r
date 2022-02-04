@@ -427,8 +427,8 @@ plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
   hide_legend(ggplotly(p))
 }
 
-plot_total_revenue_line <- function(total_tbl) {
-  ggplot(data = total_tbl, aes(x = `year(start)`, y = total_revenue, color = description)) +
+plot_total_revenue_line <- function(sales_tbl, x_, y_, color_) {
+  ggplot(data = sales_tbl, aes(x = x_, y = y_, color = color_)) +
     geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +

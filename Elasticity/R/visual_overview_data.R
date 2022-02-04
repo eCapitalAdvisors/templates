@@ -22,18 +22,9 @@ function(sales_tbl, x_title, y_title, title_chart) {
   
   hide_legend(ggplotly(p))
 }
-plot_total_revenue_bar <-
-function(total_tbl) {
-  ggplot(data = total_tbl, aes(x = city, y = total_revenue, color = description)) +
-    geom_line() +
-    geom_point() +
-    labs(title = "Total Revenue by City", x = "City", y = "Total Revenue") +
-    guides(color = guide_legend("Brand Name")) +
-    theme(plot.title = element_text(hjust = .5, face = "bold"))
-}
 plot_total_revenue_line <-
-function(total_tbl) {
-  ggplot(data = total_tbl, aes(x = `year(start)`, y = total_revenue, color = description)) +
+function(sales_tbl, x_, y_, color_) {
+  ggplot(data = sales_tbl, aes(x = x_, y = y_, color = color_)) +
     geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +
