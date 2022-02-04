@@ -277,8 +277,7 @@ total_dataset <- reactive({
 plotlyOutput("bar_revenue_plot")
 
 output$bar_revenue_plot <- renderPlotly({
-  total = total_dataset()
-  plot_total_revenue_bar(total)
+  plot_total_revenue_bar(total_dataset())
 })
 ```
 
