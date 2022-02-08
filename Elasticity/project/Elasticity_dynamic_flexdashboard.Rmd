@@ -181,8 +181,7 @@ kpi_tbl <- reactive({
 renderValueBox({
   valueBox(
     value = kpi_tbl()$total_revenue[1],
-    subtitle = "Revenue",
-    color = "black"
+    subtitle = "Revenue"
     )
 })
   
@@ -266,10 +265,10 @@ Column
 total_dataset <- reactive({
   sales_tbl %>%
     group_by(start_year) %>%
-    mutate(start = as.Date(start), end = as.Date(end), total_revenue = sum(revenue)) %>%
     filter(description %in% input$Cereal_brand,
            city %in% input$Store_location,
-           start_year %in% input$Year_choosen)
+           start_year %in% input$Year_choosen) %>%
+    mutate(total_revenue = sum(revenue), start_year = as.numeric(start_year))
 })
 
 # why are start, end, and start_year decimals?
