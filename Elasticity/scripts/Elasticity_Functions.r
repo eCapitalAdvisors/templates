@@ -228,25 +228,6 @@ get_sales_sample <- function(sales_tbl) {
   return(sales_sample_tbl)
 }
 
-# this table is for the visuals; it contains descriptive data
-get_total <- function(sales_tbl) {
-  #get total for revenue and average prices
-  total_tbl <- sales_tbl %>%
-    group_by(city, description, year(start)) %>%
-    transmute(
-      total_revenue = sum(revenue),
-      avg_price = mean(price),
-      sum_sales = sum(sales)
-      
-# you need to fix this table because it won't work with the graphics down below anymore. It doesn't 
-# output 'city', 'description', or 'year(start)' plus it doesn't sum(revenue)
-    )
-  
-  saveRDS(object = total_tbl, file = "../R/total_tbl.rds")
-  
-  return(total_tbl)
-}
-
 
 # 2.5 Save Functions ----
 
@@ -259,7 +240,7 @@ dump("input_illinois_map",
 dump(c("get_store_locations", "get_top_three", "get_sales"),
      file = "../R/joining_tables.R")
 
-dump(c("get_sales_sample", "get_total"),
+dump(c("get_sales_sample"),
      file = "../R/modified_datasets.R")
 
 
@@ -446,17 +427,8 @@ plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
   hide_legend(ggplotly(p))
 }
 
-plot_total_revenue_bar <- function(total_tbl) {
-  ggplot(data = total_tbl, aes(x = city, y = total_revenue, color = description)) +
-    geom_line() +
-    geom_point() +
-    labs(title = "Total Revenue by City", x = "City", y = "Total Revenue") +
-    guides(color = guide_legend("Brand Name")) +
-    theme(plot.title = element_text(hjust = .5, face = "bold"))
-}
-
-plot_total_revenue_line <- function(total_tbl) {
-  ggplot(data = total_tbl, aes(x = `year(start)`, y = total_revenue, color = description)) +
+plot_total_revenue_line <- function(sales_tbl, x_, y_, color_) {
+  ggplot(data = sales_tbl, aes(x = x_, y = y_, color = color_)) +
     geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +
@@ -474,7 +446,7 @@ illinois_map_fortified <- tidy(illinois_map)
 
 # 5.1 Save Functions ----
 
-dump(c("plot_violin_sales", "plot_violin_price", "plot_total_revenue_bar", "plot_total_revenue_line", "illinois_map_fortified"),
+dump(c("plot_violin_sales", "plot_violin_price", "plot_total_revenue_line", "illinois_map_fortified"),
      file = "../R/visual_overview_data.R")
 
 
@@ -532,7 +504,6 @@ dump("plot_fitted_vs_residual",
 # top_three_brands_tbl <- get_top_three(descriptions_tbl, prices_tbl)
 # sales_tbl <- get_sales(descriptions_tbl, prices_tbl, filtered_store_locations_tbl, top_three_brands_tbl, dates_tbl)
 # sales_sample_tbl <- get_sales_sample(sales_tbl)
-# total_tbl <- get_total(sales_tbl)
 #
 # plot_boxplot_sales(sales_tbl, "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 # plot_boxplot_price(sales_tbl, "Brand Names", "Price of Cereal Boxes", "Distribution of Prices by Brand")

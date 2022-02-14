@@ -240,7 +240,12 @@ plotlyOutput("violin_sales_plot")
 output$violin_sales_plot <- renderPlotly({
   plot_violin_sales(dataset(), "Brand Names", "Sales of Cereal Boxes", "Distribution of Sales by Brand")
 })
+```
 
+Column
+----------------------------------------------
+
+```{r}
 # Violin Plot for Prices
 
 plotlyOutput("violin_price_plot")
@@ -253,40 +258,29 @@ output$violin_price_plot <- renderPlotly({
 Column
 ----------------------------------------------
 
-### Bar Graph
+### Line Graph
 
 ```{r}
 # total_dataset is a reactive expression that interacts with cereal brands, dates, and store prices & sales.
 
 total_dataset <- reactive({
-  total_tbl %>%
-    filter(description %in% input$Cereal_brand) %>%
-      filter(city %in% input$Store_location) %>%
-        filter(year(start) %in% input$Year_choosen) %>%
-    select(sales, price)
+  sales_tbl %>%
+    group_by(start_year) %>%
+    mutate(start = as.Date(start), end = as.Date(end), total_revenue = sum(revenue)) %>%
+    filter(description %in% input$Cereal_brand,
+           city %in% input$Store_location,
+           start_year %in% input$Year_choosen)
 })
 
-# renderTable(total_dataset())
+# why are start, end, and start_year decimals?
 
-# Bar Graph of Revenue by City
-plotlyOutput("bar_revenue_plot")
+renderTable(total_dataset())
 
-output$bar_revenue_plot <- renderPlotly({
-  total = total_dataset()
-  plot_total_revenue_bar(total)
-})
-```
-
-
-### Line Graph
-
-```{r}
 # Line Graph of Revenue by Time
 plotlyOutput("line_revenue_plot")
 
 output$line_revenue_plot <- renderPlotly({
-  total = total_dataset()
-  plot_total_revenue_line(total)
+  plot_total_revenue_line(total_dataset(), start_year, total_revenue, description)
 })
 ```
 
