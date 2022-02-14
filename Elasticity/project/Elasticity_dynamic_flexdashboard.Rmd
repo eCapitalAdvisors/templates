@@ -260,8 +260,9 @@ total_dataset <- reactive({
   sales_tbl %>%
     filter(description %in% input$Cereal_brand,
            city %in% input$Store_location,
-           start_year %in% input$Year_choosen) %>%
-    mutate(total_revenue = sum(revenue), start_year = as.integer(start_year)) %>%
+           as.integer(start_year) %in% input$Year_choosen) %>%
+    group_by(description, city, start_year) %>%
+    mutate(total_revenue = sum(revenue)) %>%
     select(start_year, city, description, total_revenue)
 })
 

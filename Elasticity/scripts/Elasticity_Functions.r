@@ -429,8 +429,8 @@ plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
 
 plot_total_revenue_line <- function(dataset) {
   
-  ggplot(data = dataset, aes(x = start_year, y = revenue)) +
-    geom_line(color = description, se = FAlSE) +
+  ggplot(data = dataset, aes(x = start_year, y = total_revenue, color = description)) +
+    geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +
     guides(color = guide_legend("Brand Name")) +
