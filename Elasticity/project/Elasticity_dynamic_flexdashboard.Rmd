@@ -98,12 +98,6 @@ ci <- readRDS(file = "../R/ci.rds")
 Page 1
 ==============================================
 
-### About Elasticity
-
-
-Page 2
-==============================================
-
 Sidebar {.sidebar}
 ----------------------------------------------
 
@@ -264,26 +258,24 @@ Column
 
 total_dataset <- reactive({
   sales_tbl %>%
-    group_by(start_year) %>%
     filter(description %in% input$Cereal_brand,
            city %in% input$Store_location,
            start_year %in% input$Year_choosen) %>%
-    mutate(total_revenue = sum(revenue), start_year = as.numeric(start_year))
+    mutate(total_revenue = sum(revenue), start_year = as.integer(start_year)) %>%
+    select(start_year, city, description, total_revenue)
 })
 
-# why are start, end, and start_year decimals?
-
-renderTable(total_dataset())
+# renderTable(total_dataset())
 
 # Line Graph of Revenue by Time
 plotlyOutput("line_revenue_plot")
 
 output$line_revenue_plot <- renderPlotly({
-  plot_total_revenue_line(total_dataset(), start_year, total_revenue, description)
+  plot_total_revenue_line(total_dataset())
 })
 ```
 
-Page 3
+Page 2
 ==============================================
 
 Sidebar {.sidebar}
@@ -341,8 +333,7 @@ reactive_alpha <- reactive({
 plotlyOutput("bootstrap_plot")
 
 output$bootstrap_plot <- renderPlotly({
-  data = reactive_alpha()
-  plot_bootstrap(data)
+  plot_bootstrap(reactive_alpha())
 })
 ```
 
