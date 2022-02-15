@@ -23,8 +23,9 @@ function(sales_tbl, x_title, y_title, title_chart) {
   hide_legend(ggplotly(p))
 }
 plot_total_revenue_line <-
-function(sales_tbl, x_, y_, color_) {
-  ggplot(data = sales_tbl, aes(x = x_, y = y_, color = color_)) +
+function(dataset) {
+  
+  ggplot(data = dataset, aes(x = start_year, y = total_revenue, color = description)) +
     geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +

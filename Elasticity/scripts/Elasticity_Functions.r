@@ -24,12 +24,9 @@ library(readxl)
 
 # visuals
 library(plotly)
-library(geojson)
-library(geojsonio)
 library(haven)
-library(mapproj)
-library(sp)
-library(ggrepel)
+library(sf) # for illinois map
+library(ggmap) # for illinois map
 
 ## Read Data
 
@@ -37,8 +34,6 @@ descriptions_path <- "raw_data_cereal_descriptions.xlsx"
 prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
-illinois_map_path <- "https://raw.githubusercontent.com/empet/Datasets/master/illinois-election.geojson"
-
 
 # 2.0 PREPROCESS DATA ----
 
@@ -90,7 +85,7 @@ input_store_locations <- function(store_locations_path) {
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
     mutate(lat = format(lat / 10000, nsmall = 4)) %>%
-    mutate(long = format(long / 10000, nsmall = 4))
+    mutate(long = format(long / -10000, nsmall = 4))
   
   saveRDS(object = store_locations_tbl, file = "../R/store_locations_tbl.rds")
   
@@ -142,7 +137,7 @@ input_dates <- function() {
 
 # reading in a map from online
 input_illinois_map <- function(illinois_map_path) {
-  illinois_map <- geojson_read(illinois_map_path, what = "sp")
+  illinois_map <- geojson_sf(illinois_map_path)
   
   saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
   
@@ -427,8 +422,9 @@ plot_violin_price <- function(sales_tbl, x_title, y_title, title_chart) {
   hide_legend(ggplotly(p))
 }
 
-plot_total_revenue_line <- function(sales_tbl, x_, y_, color_) {
-  ggplot(data = sales_tbl, aes(x = x_, y = y_, color = color_)) +
+plot_total_revenue_line <- function(dataset) {
+  
+  ggplot(data = dataset, aes(x = start_year, y = total_revenue, color = description)) +
     geom_line() +
     geom_point() +
     labs(title = "Total Revenue per Year", x = "Year", y = "Total Revenue") +
@@ -436,13 +432,28 @@ plot_total_revenue_line <- function(sales_tbl, x_, y_, color_) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
-illinois_map_fortified <- tidy(illinois_map)
+install_github("dkahle/ggmap", ref = "tidyup")
+library(ggmap)
+chicago <- get_stamenmap(bbox = c(left = -88.0225, bottom = 41.5949, 
+                                  right = -87.2713, top = 42.0677), 
+                         zoom = 10)
 
-# ggplot() +
-#   geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
-#   geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
-#   theme_void() +
-#   coord_map()
+
+longitude_latitude.new<- rbind(c( -87.6298,41.8781), c( -87.4298,41.9781))
+longitude_latitude.new<-as.data.frame(longitude_latitude.new)
+colnames(longitude_latitude.new) <- c('Longitude', 'Latitude')
+
+chicago_map <- ggmap(chicago) 
+chicago_map + geom_point(data = longitude_latitude.new, aes(x = Longitude , y = Latitude, size = 5))
+
+store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("long", "lat"))
+st_crs(store_locations_sf) <- 4326 # set the coordinate reference system
+
+illinois_map_fortified <- ggplot() +
+  geom_sf(data = illinois_map) +
+  geom_sf(data = store_locations_sf, shape = 1, color = "red")
+
+illinois_map_fortified
 
 # 5.1 Save Functions ----
 
