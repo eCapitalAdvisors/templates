@@ -28,7 +28,8 @@ library(geojson)
 library(geojsonio)
 library(haven)
 library(mapproj)
-library(sp)
+library(sf)
+library(geojsonsf)
 library(ggrepel)
 
 ## Read Data
@@ -142,7 +143,7 @@ input_dates <- function() {
 
 # reading in a map from online
 input_illinois_map <- function(illinois_map_path) {
-  illinois_map <- geojson_read(illinois_map_path, what = "sp")
+  illinois_map <- geojson_sf(illinois_map_path)
   
   saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
   
@@ -437,13 +438,13 @@ plot_total_revenue_line <- function(dataset) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
-illinois_map_fortified <- tidy(illinois_map)
+illinois_map_fortified <- ggplot(illinois_map) +
+  geom_sf() +
+  
+ggplot(sales_tbl %>% group_by(city), aes(x = as.double(long), y = as.double(lat), colour = "red")) +
+  geom_point()
 
-# ggplot() +
-#   geom_polygon(data = illinois_map_fortified, aes(x = long, y = lat, group = group), fill = "#69b3a2", color = "white") +
-#   geom_point(data = sales_tbl, aes(x = long, y = lat, size = revenue, color = revenue)) + 
-#   theme_void() +
-#   coord_map()
+illinois_map_fortified
 
 # 5.1 Save Functions ----
 
