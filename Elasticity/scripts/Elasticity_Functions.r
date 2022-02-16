@@ -35,6 +35,10 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
+register_google(key = "AIzaSyDyytZoaNPEljO-HbhZpQJi304N76b2RjA", write = TRUE)
+
+Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
+
 # 2.0 PREPROCESS DATA ----
 
 # 2.1 Cleaning the Table ----
@@ -136,6 +140,8 @@ input_dates <- function() {
 # 2.2 Creating a Map Template ----
 
 # reading in a map from online
+
+# figure this out
 input_illinois_map <- function(illinois_map_path) {
   illinois_map <- geojson_sf(illinois_map_path)
   
@@ -143,7 +149,6 @@ input_illinois_map <- function(illinois_map_path) {
   
   return(illinois_map)
 }
-
 
 # 2.3 Joining the Tables ----
 
@@ -432,19 +437,7 @@ plot_total_revenue_line <- function(dataset) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
-install_github("dkahle/ggmap", ref = "tidyup")
-library(ggmap)
-chicago <- get_stamenmap(bbox = c(left = -88.0225, bottom = 41.5949, 
-                                  right = -87.2713, top = 42.0677), 
-                         zoom = 10)
-
-
-longitude_latitude.new<- rbind(c( -87.6298,41.8781), c( -87.4298,41.9781))
-longitude_latitude.new<-as.data.frame(longitude_latitude.new)
-colnames(longitude_latitude.new) <- c('Longitude', 'Latitude')
-
-chicago_map <- ggmap(chicago) 
-chicago_map + geom_point(data = longitude_latitude.new, aes(x = Longitude , y = Latitude, size = 5))
+# I have some cleaning to do here
 
 store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("long", "lat"))
 st_crs(store_locations_sf) <- 4326 # set the coordinate reference system
@@ -489,6 +482,7 @@ plot_fitted_vs_residual <- function(sales_sample_tbl, model = "none", method = "
     ggplotly(p)
   }
 }
+
 
 # 6.1 Save Functions ----
 

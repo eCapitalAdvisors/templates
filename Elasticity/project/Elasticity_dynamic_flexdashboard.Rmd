@@ -210,7 +210,7 @@ renderValueBox({
 ```
 
 
-Column
+Row
 ----------------------------------------------
 
 ### Violin Plot
@@ -235,8 +235,6 @@ output$violin_sales_plot <- renderPlotly({
 })
 ```
 
-Column
-----------------------------------------------
 
 ```{r}
 # Violin Plot for Prices
