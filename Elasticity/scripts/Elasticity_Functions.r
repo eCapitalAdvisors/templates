@@ -39,9 +39,8 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
-# only need to load once, create it as an environment variable
-
-register_google(key = "AIzaSyDD7h-vsK1DFp-swpR073NCcjf8t1LfSaw", write = TRUE)
+# Google API key
+maps_api_key <- Sys.getenv("GOOGLEMAPS_API_KEY")
 
 # 2.0 PREPROCESS DATA ----
 
@@ -143,15 +142,11 @@ input_dates <- function() {
 
 # 2.2 Creating a Map Template ----
 
-# reading in a map from online
+# reading in a map
 
-# figure this out
-input_illinois_map <- function(illinois_map_path) {
-  illinois_map <- geojson_sf(illinois_map_path)
+input_google_map <- function(maps_api_key) {
   
-  saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
-  
-  return(illinois_map)
+  register_google(key = maps_api_key)
 }
 
 # 2.3 Joining the Tables ----
