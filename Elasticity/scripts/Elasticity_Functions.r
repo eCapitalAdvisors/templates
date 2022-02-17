@@ -42,13 +42,9 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
-<<<<<<< HEAD
 # Google API key
 maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
 
-=======
-Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
->>>>>>> 240782106670a0505da72f79a99693df8f8b99f0
 
 # 2.0 PREPROCESS DATA ----
 
@@ -278,7 +274,7 @@ get_betas <- function(sales_tbl) {
   
   return(bootstrap_tbl)
 }
-  
+
 # obtain confidence interval for bootstrap
 get_ci_for_bootstrap <- function(bootstrap_tbl) {
   
@@ -309,7 +305,7 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
     coord_flip()
   
   hide_legend(ggplotly(p))
-  }
+}
 
 plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
   
@@ -319,7 +315,7 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
-
+  
   hide_legend(ggplotly(p))
 }
 
