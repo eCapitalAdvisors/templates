@@ -28,9 +28,12 @@ library(haven)
 library(sf) # for illinois map
 library(ggmap) # for illinois map
 
-# to load ggmap sometimes you need to run this
-if(!requireNamespace("devtools")) install.packages("devtools")
-devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
+# Load ggmap sometimes you need to run this
+# if(!requireNamespace("devtools")) install.packages("devtools")
+# devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
+
+# Save the api key as a environment variable
+library(rromeo)
 
 ## Read Data
 
@@ -40,7 +43,8 @@ store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
 # Google API key
-maps_api_key <- Sys.getenv("GOOGLEMAPS_API_KEY")
+maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
+
 
 # 2.0 PREPROCESS DATA ----
 
@@ -88,11 +92,12 @@ input_prices <- function(prices_path) {
 input_store_locations <- function(store_locations_path) {
   #importing file
   store_locations_tbl <- read_dta(store_locations_path) %>%
-    select(city, zip, lat, long, store) %>%
+    rename(lon = long) %>%
+    select(city, zip, lat, lon, store) %>%
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
     mutate(lat = format(lat / 10000, nsmall = 4)) %>%
-    mutate(long = format(long / -10000, nsmall = 4))
+    mutate(lon = format(lon / -10000, nsmall = 4))
   
   saveRDS(object = store_locations_tbl, file = "../R/store_locations_tbl.rds")
   
@@ -204,7 +209,7 @@ get_sales <-
              city,
              zip,
              lat,
-             long,
+             lon,
              state_name)
     
     saveRDS(object = sales_tbl, file = "../R/sales_tbl.rds")
@@ -438,11 +443,14 @@ plot_total_revenue_line <- function(dataset) {
 
 # I have some cleaning to do here
 
-store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("long", "lat"))
+p <- ggmap(get_map("Chicago", zoom = 10, maptype = "roadmap")) + 
+  geom_sf(data = store_locations_sf, shape = 1, color = "red")
+
+store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("lon", "lat"))
 st_crs(store_locations_sf) <- 4326 # set the coordinate reference system
 
-illinois_map_fortified <- ggplot() +
-  geom_sf(data = illinois_map) +
+chicago_map_fortified <- ggplot() +
+  geom_sf(data = p) +
   geom_sf(data = store_locations_sf, shape = 1, color = "red")
 
 illinois_map_fortified
