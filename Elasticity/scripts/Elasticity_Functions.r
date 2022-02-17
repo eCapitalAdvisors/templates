@@ -28,6 +28,13 @@ library(haven)
 library(sf) # for illinois map
 library(ggmap) # for illinois map
 
+# Load ggmap sometimes you need to run this
+# if(!requireNamespace("devtools")) install.packages("devtools")
+# devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
+
+# Save the api key as a environment variable
+library(rromeo)
+
 ## Read Data
 
 descriptions_path <- "raw_data_cereal_descriptions.xlsx"
@@ -35,7 +42,9 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
-Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
+# Google API key
+maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
+
 
 # 2.0 PREPROCESS DATA ----
 
@@ -83,11 +92,12 @@ input_prices <- function(prices_path) {
 input_store_locations <- function(store_locations_path) {
   #importing file
   store_locations_tbl <- read_dta(store_locations_path) %>%
-    select(city, zip, lat, long, store) %>%
+    rename(lon = long) %>%
+    select(city, zip, lat, lon, store) %>%
     filter(city != "") %>%
     mutate(city = str_to_title(city)) %>%
     mutate(lat = format(lat / 10000, nsmall = 4)) %>%
-    mutate(long = format(long / -10000, nsmall = 4))
+    mutate(lon = format(lon / -10000, nsmall = 4))
   
   saveRDS(object = store_locations_tbl, file = "../R/store_locations_tbl.rds")
   
@@ -137,15 +147,11 @@ input_dates <- function() {
 
 # 2.2 Creating a Map Template ----
 
-# reading in a map from online
+# reading in a map
 
-# figure this out
-input_illinois_map <- function(illinois_map_path) {
-  illinois_map <- geojson_sf(illinois_map_path)
+input_google_map <- function(maps_api_key) {
   
-  saveRDS(object = illinois_map, file = "../R/illinois_map.rds")
-  
-  return(illinois_map)
+  register_google(key = maps_api_key)
 }
 
 # 2.3 Joining the Tables ----
@@ -203,7 +209,7 @@ get_sales <-
              city,
              zip,
              lat,
-             long,
+             lon,
              state_name)
     
     saveRDS(object = sales_tbl, file = "../R/sales_tbl.rds")
@@ -268,7 +274,7 @@ get_betas <- function(sales_tbl) {
   
   return(bootstrap_tbl)
 }
-  
+
 # obtain confidence interval for bootstrap
 get_ci_for_bootstrap <- function(bootstrap_tbl) {
   
@@ -299,7 +305,7 @@ plot_boxplot_sales <- function(sales_tbl, x_title, y_title, title_chart) {
     coord_flip()
   
   hide_legend(ggplotly(p))
-  }
+}
 
 plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
   
@@ -309,7 +315,7 @@ plot_boxplot_price <- function(sales_tbl, x_title, y_title, title_chart) {
     labs(x = x_title, y = y_title, title = title_chart, caption = "The y-values are transformed on a log scale.") +
     theme(plot.title = element_text(hjust = .5, face = "bold"), plot.caption = element_text(hjust = .5)) +
     coord_flip()
-
+  
   hide_legend(ggplotly(p))
 }
 
@@ -437,11 +443,14 @@ plot_total_revenue_line <- function(dataset) {
 
 # I have some cleaning to do here
 
-store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("long", "lat"))
+p <- ggmap(get_map("Chicago", zoom = 10, maptype = "roadmap")) + 
+  geom_sf(data = store_locations_sf, shape = 1, color = "red")
+
+store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("lon", "lat"))
 st_crs(store_locations_sf) <- 4326 # set the coordinate reference system
 
-illinois_map_fortified <- ggplot() +
-  geom_sf(data = illinois_map) +
+chicago_map_fortified <- ggplot() +
+  geom_sf(data = p) +
   geom_sf(data = store_locations_sf, shape = 1, color = "red")
 
 illinois_map_fortified
