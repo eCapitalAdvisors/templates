@@ -28,6 +28,10 @@ library(haven)
 library(sf) # for illinois map
 library(ggmap) # for illinois map
 
+# to load ggmap sometimes you need to run this
+if(!requireNamespace("devtools")) install.packages("devtools")
+devtools::install_github("dkahle/ggmap", ref = "tidyup", force=TRUE)
+
 ## Read Data
 
 descriptions_path <- "raw_data_cereal_descriptions.xlsx"
@@ -35,9 +39,9 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
-register_google(key = "AIzaSyDyytZoaNPEljO-HbhZpQJi304N76b2RjA", write = TRUE)
+# only need to load once, create it as an environment variable
 
-Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
+register_google(key = "AIzaSyDD7h-vsK1DFp-swpR073NCcjf8t1LfSaw", write = TRUE)
 
 # 2.0 PREPROCESS DATA ----
 
