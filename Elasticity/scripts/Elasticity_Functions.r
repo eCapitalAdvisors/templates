@@ -35,8 +35,6 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
-register_google(key = "AIzaSyDyytZoaNPEljO-HbhZpQJi304N76b2RjA", write = TRUE)
-
 Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
 
 # 2.0 PREPROCESS DATA ----
