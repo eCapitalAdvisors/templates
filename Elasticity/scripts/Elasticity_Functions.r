@@ -42,9 +42,13 @@ prices_path <- "raw_data_cereal_prices.xlsx"
 store_locations_path <- "demo.dta"
 us_locations_path <- "uszips.xlsx"
 
+<<<<<<< HEAD
 # Google API key
 maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
 
+=======
+Chicago <- get_map("Chicago", zoom = 12, source = "google", maptype = "road")
+>>>>>>> 240782106670a0505da72f79a99693df8f8b99f0
 
 # 2.0 PREPROCESS DATA ----
 
