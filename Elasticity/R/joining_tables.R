@@ -45,7 +45,7 @@ function(descriptions_tbl,
              city,
              zip,
              lat,
-             long,
+             lon,
              state_name)
     
     saveRDS(object = sales_tbl, file = "../R/sales_tbl.rds")
