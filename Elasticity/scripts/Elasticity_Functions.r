@@ -443,17 +443,9 @@ plot_total_revenue_line <- function(dataset) {
 
 # I have some cleaning to do here
 
-p <- ggmap(get_map("Chicago", zoom = 10, maptype = "roadmap")) + 
-  geom_sf(data = store_locations_sf, shape = 1, color = "red")
+p <- ggmap(get_map(location = c(lon = -87.9, lat = 41.9), maptype = "roadmap")) + 
+  geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red"))
 
-store_locations_sf <- st_as_sf(sales_tbl %>% group_by(city), coords = c("lon", "lat"))
-st_crs(store_locations_sf) <- 4326 # set the coordinate reference system
-
-chicago_map_fortified <- ggplot() +
-  geom_sf(data = p) +
-  geom_sf(data = store_locations_sf, shape = 1, color = "red")
-
-illinois_map_fortified
 
 # 5.1 Save Functions ----
 
