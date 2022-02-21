@@ -443,8 +443,13 @@ plot_total_revenue_line <- function(dataset) {
 
 # I have some cleaning to do here
 
+input_google_map(maps_api_key)
+
 p <- ggmap(get_map(location = c(lon = -87.9, lat = 41.9), maptype = "roadmap")) + 
-  geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red"))
+  geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red")) +
+  xlab("longitude") +
+  ylab("latitude") +
+  theme(legend.position = "none")
 
 
 # 5.1 Save Functions ----
