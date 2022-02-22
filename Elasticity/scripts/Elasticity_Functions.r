@@ -387,16 +387,45 @@ plot_scatter <- function(sales_sample_tbl, model = "none"){
   }
 }
 
-plot_bootstrap <- function(bootstrap_tbl) {
-  p <- ggplot(bootstrap_tbl %>% filter(term == "price") %>% select(replicate, estimate), aes(estimate)) +
+plot_bootstrap <- function(bootstrap_tbl, brand = "none") {
+  
+  if (brand == "Cinnamon Toast Crunch") {
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Cinnamon Toast Crunch") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
     geom_density() + 
-    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(lower_ci), linetype = "dotted", color = "red") +
-    geom_vline(xintercept = ci %>% filter(term == "price") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+    geom_vline(xintercept = ci %>% filter(description == "Cinnamon Toast Crunch") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+    geom_vline(xintercept = ci %>% filter(description == "Cinnamon Toast Crunch") %>% pull(upper_ci), linetype = "dotted", color = "red") +
     labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
     theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
   
-  ggplotly(p)
+  else if (brand = "Wheaties") {
+    
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Wheaties") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
+      geom_density() + 
+      geom_vline(xintercept = ci %>% filter(description == "Wheaties") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+      geom_vline(xintercept = ci %>% filter(description == "Wheaties") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+      labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
+  
+  else {
+    
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Kix") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
+      geom_density() + 
+      geom_vline(xintercept = ci %>% filter(description == "Kix") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+      geom_vline(xintercept = ci %>% filter(description == "Kix") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+      labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
+  
 }
+
 
 # 4.1 Save Functions ----
 
@@ -441,20 +470,24 @@ plot_total_revenue_line <- function(dataset) {
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
 
-# I have some cleaning to do here
-
-input_google_map(maps_api_key)
-
-p <- ggmap(get_map(location = c(lon = -87.9, lat = 41.9), maptype = "roadmap")) + 
-  geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red")) +
-  xlab("longitude") +
-  ylab("latitude") +
-  theme(legend.position = "none")
+plot_chicago_map <- function(maps_api_key, sales_tbl) {
+  
+  input_google_map(maps_api_key)
+  
+  p <- ggmap(get_map(location = c(lon = -87.9, lat = 41.9), maptype = "roadmap")) + 
+    geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red")) +
+    xlab("longitude") +
+    ylab("latitude") +
+    theme(legend.position = "none")
+  
+  ggplotly(p)
+  
+}
 
 
 # 5.1 Save Functions ----
 
-dump(c("plot_violin_sales", "plot_violin_price", "plot_total_revenue_line", "illinois_map_fortified"),
+dump(c("plot_violin_sales", "plot_violin_price", "plot_total_revenue_line", "plot_chicago_map"),
      file = "../R/visual_overview_data.R")
 
 
