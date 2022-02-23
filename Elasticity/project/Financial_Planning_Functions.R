@@ -21,7 +21,6 @@ library(plotly)
 descriptions_path <- "raw_data_cereal_descriptions.csv"
 prices_path <- "raw_data_cereal_prices.csv"
 store_locations_path <- "demo.dta"
-us_locations_path <- "uszips.csv"
 
 
 # 2.0 PREPROCESS DATA ----
@@ -84,17 +83,6 @@ input_store_locations <- function(store_locations_path) {
   return(store_locations_tbl)
 }
 
-# selecting variables of choice
-input_us_locations <- function(us_locations_path) {
-  #importing file
-  us_locations_tbl <- read_csv(us_locations_path) %>%
-    select(zip, state_name)
-  
-  saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
-  
-  return(us_locations_tbl)
-}
-
 # created a dates tibble to match up with the week numbers
 input_dates <- function() {
   d <- as_date(7196)
@@ -126,18 +114,6 @@ input_dates <- function() {
 
 # 2.2 Joining the Tibbles ----
 
-# joining tibbes
-get_store_locations <- function(store_locations_tbl, us_locations_tbl) {
-    # This table tells us all the unique store locations
-    filtered_store_locations_tbl <- store_locations_tbl %>%
-      mutate(zip = as.character(zip)) %>%
-      left_join(us_locations_tbl)
-    
-    saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")
-    
-    return(filtered_store_locations_tbl)
-  }
-
 # this tibble discovers the three brands that have the most data in the dataset
 # to limit the amount of data in the model
 get_top_three <- function(descriptions_tbl, prices_tbl) {
@@ -158,14 +134,14 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
 get_sales <-
   function(descriptions_tbl,
            prices_tbl,
-           filtered_store_locations_tbl,
            top_three_brands_tbl,
+           store_locations_tbl,
            dates_tbl) {
     # filtering to top three brands
     sales_tbl <- prices_tbl %>%
       inner_join(descriptions_tbl) %>%
       inner_join(top_three_brands_tbl) %>%
-      inner_join(filtered_store_locations_tbl) %>%
+      inner_join(store_locations_tbl) %>%
       inner_join(dates_tbl) %>%
       mutate(revenue = price * move, start_year = year(start)) %>%
       select(start,
@@ -178,8 +154,7 @@ get_sales <-
              city,
              zip,
              lat,
-             lon,
-             state_name)
+             lon)
     
     saveRDS(object = sales_tbl, file = "../R/sales_tbl.rds")
     
@@ -257,7 +232,7 @@ product_summary_tbl <- product_detail_tbl %>%
          Gross_Margin_Pct = Gross_Margin / Total_GM,
          Unit_Sales_Growth = (Unit_Sales/dplyr::lag(Unit_Sales) - 1)) %>%
   select(Year, description, Unit_Sales, Unit_Sales_Growth, Avg_Retail_Price, Bundle_Sales, Revenue, Revenue_Pct, Gross_Margin, Gross_Margin_Pct)
-  
+
 # changes the format of the tibble
 product_summary_wide_tbl <- product_summary_tbl %>%  
   pivot_longer(c(Unit_Sales:Gross_Margin_Pct), names_to = "Metric", values_to = "Value") %>%
@@ -322,3 +297,41 @@ product_summary_tbl %>%
   scale_color_discrete("Cereal Brands") +
   scale_y_continuous(labels = scales::dollar_format())
 
+plot_bootstrap <- function(bootstrap_tbl, brand = "none") {
+  
+  if (brand == "Cinnamon Toast Crunch") {
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Cinnamon Toast Crunch") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
+      geom_density() + 
+      geom_vline(xintercept = ci %>% filter(description == "Cinnamon Toast Crunch") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+      geom_vline(xintercept = ci %>% filter(description == "Cinnamon Toast Crunch") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+      labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
+  
+  else if (brand = "Wheaties") {
+    
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Wheaties") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
+      geom_density() + 
+      geom_vline(xintercept = ci %>% filter(description == "Wheaties") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+      geom_vline(xintercept = ci %>% filter(description == "Wheaties") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+      labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
+  
+  else {
+    
+    p <- ggplot(bootstrap_tbl %>% filter(description == "Kix") %>% unnest(bootstrap_slopes) %>% select(replicate, stat), aes(stat)) +
+      geom_density() + 
+      geom_vline(xintercept = ci %>% filter(description == "Kix") %>% pull(lower_ci), linetype = "dotted", color = "red") +
+      geom_vline(xintercept = ci %>% filter(description == "Kix") %>% pull(upper_ci), linetype = "dotted", color = "red") +
+      labs(title = "Bootstrap of Means", x = "Estimates of Beta", y = "Count") +
+      theme(plot.title = element_text(hjust = .5, face = "bold"))
+    
+    ggplotly(p)
+  }
+  
+}
