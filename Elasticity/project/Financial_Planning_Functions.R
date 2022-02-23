@@ -287,7 +287,8 @@ product_summary_tbl %>%
   geom_bar(position = "stack", stat = "identity") +
   scale_x_discrete(limits = seq(1989, 1997)) +
   scale_y_continuous(labels = scales::dollar_format()) +
-  scale_fill_discrete(name = "Cereal Brands")
+  scale_fill_discrete(name = "Cereal Brands") +
+  labs(title = "Annual Revenue")
 
 # line graph of Year on Revenue
 product_summary_tbl %>%
@@ -295,7 +296,8 @@ product_summary_tbl %>%
   geom_line() +
   scale_x_discrete(limits = seq(1989, 1997)) +
   scale_color_discrete("Cereal Brands") +
-  scale_y_continuous(labels = scales::dollar_format())
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(title = "Annual Revenue")
 
 plot_bootstrap <- function(bootstrap_tbl, brand = "none") {
   
