@@ -161,6 +161,7 @@ get_store_locations <-
   function(store_locations_tbl, us_locations_tbl) {
     # This tibble tells us all the unique store locations
     filtered_store_locations_tbl <- store_locations_tbl %>%
+      mutate(zip = as.character(zip)) %>%
       left_join(us_locations_tbl)
     
     saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")

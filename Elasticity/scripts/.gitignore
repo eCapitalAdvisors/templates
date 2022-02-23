@@ -2,3 +2,5 @@ Elasticity_Functions.r
 *.RData
 *.Rhistory
 *.Renviron
+*.csv
+*.docx
