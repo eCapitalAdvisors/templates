@@ -1,14 +1,68 @@
+#' ---
+#' title: "Template: Elasticity Financial Functions"
+#' author: "Lila Sahar and Juan Malaver"
+#' output: github_document
+#' ---
+#' 
 
-# loaded libraries
+# 1.0 LIBRARIES & DATA ----
+
+# core
+library(tidyverse)
 library(lubridate)
+library(readxl)
+
+# visuals
+library(plotly)
 
 # data paths
-prices_path <- "raw_data_cereal_prices.xlsx"
 descriptions_path <- "raw_data_cereal_descriptions.xlsx"
+prices_path <- "raw_data_cereal_prices.xlsx"
+store_locations_path <- "demo.dta"
+us_locations_path <- "uszips.xlsx"
 
-# reading in the data paths
-prices_tbl <- read_excel(prices_path)
-descriptions_tbl <- read_excel(descriptions_path)
+
+# 2.0 PREPROCESS DATA ----
+
+# 2.1 Cleaning the Table ----
+
+# selecting variables of choice, renaming the variables and standardizing label names
+input_descriptions <- function(descriptions_path) {
+  # importing file
+  descriptions_tbl <- read_excel(descriptions_path) %>%
+    select(UPC, DESCRIP) %>%
+    rename(description = DESCRIP) %>%
+    mutate(
+      description = recode(
+        description,
+        `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch",
+        `KIX` = "Kix",
+        `WHEATIES` = "Wheaties"
+      ))
+  
+  saveRDS(object = descriptions_tbl, file = "../R/descriptions_tbl.rds")
+  
+  return(descriptions_tbl)
+} 
+
+# selecting the variables of choice, renaming the variable names
+input_prices <- function(prices_path) {
+  # importing file
+  prices_tbl <- read_excel(prices_path) %>%
+    select(STORE, UPC, WEEK, MOVE, PRICE) %>%
+    filter(PRICE > 0) %>%
+    filter(MOVE > 0) %>%
+    rename(
+      store = STORE,
+      week = WEEK,
+      sales = MOVE,
+      price = PRICE
+    )
+  
+  saveRDS(object = prices_tbl, file = "../R/prices_tbl.rds")
+  
+  return(prices_tbl)
+}
 
 # created a dates tibble to match up with the week numbers
 input_dates <- function() {
