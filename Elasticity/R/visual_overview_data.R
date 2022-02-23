@@ -32,3 +32,17 @@ function(dataset) {
     guides(color = guide_legend("Brand Name")) +
     theme(plot.title = element_text(hjust = .5, face = "bold"))
 }
+plot_chicago_map <-
+function(maps_api_key, sales_tbl) {
+  
+  input_google_map(maps_api_key)
+  
+  p <- ggmap(get_map(location = c(lon = -87.9, lat = 41.9), maptype = "roadmap")) + 
+    geom_point(data = sales_tbl %>% group_by(city), aes(x = as.numeric(lon), y = as.numeric(lat), color = "red")) +
+    xlab("longitude") +
+    ylab("latitude") +
+    theme(legend.position = "none")
+  
+  ggplotly(p)
+  
+}
