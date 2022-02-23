@@ -37,10 +37,10 @@ library(rromeo)
 
 ## Read Data
 
-descriptions_path <- "raw_data_cereal_descriptions.xlsx"
-prices_path <- "raw_data_cereal_prices.xlsx"
+descriptions_path <- "raw_data_cereal_descriptions.csv"
+prices_path <- "raw_data_cereal_prices.csv"
 store_locations_path <- "demo.dta"
-us_locations_path <- "uszips.xlsx"
+us_locations_path <- "uszips.csv"
 
 # Google API key
 maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
@@ -48,12 +48,12 @@ maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
 
 # 2.0 PREPROCESS DATA ----
 
-# 2.1 Cleaning the Table ----
+# 2.1 Cleaning the tibble ----
 
 # selecting variables of choice, renaming the variables and standardizing label names
 input_descriptions <- function(descriptions_path) {
   # importing file
-  descriptions_tbl <- read_excel(descriptions_path) %>%
+  descriptions_tbl <- read_csv(descriptions_path) %>%
     select(UPC, DESCRIP) %>%
     rename(description = DESCRIP) %>%
     mutate(
@@ -72,7 +72,7 @@ input_descriptions <- function(descriptions_path) {
 # selecting the variables of choice, renaming the variable names
 input_prices <- function(prices_path) {
   # importing file
-  prices_tbl <- read_excel(prices_path) %>%
+  prices_tbl <- read_csv(prices_path) %>%
     select(STORE, UPC, WEEK, MOVE, PRICE) %>%
     filter(PRICE > 0) %>%
     filter(MOVE > 0) %>%
@@ -107,7 +107,7 @@ input_store_locations <- function(store_locations_path) {
 # selecting variables of choice
 input_us_locations <- function(us_locations_path) {
   #importing file
-  us_locations_tbl <- read_excel(us_locations_path) %>%
+  us_locations_tbl <- read_csv(us_locations_path) %>%
     select(zip, state_name)
   
   saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
@@ -154,13 +154,14 @@ input_google_map <- function(maps_api_key) {
   register_google(key = maps_api_key)
 }
 
-# 2.3 Joining the Tables ----
+# 2.3 Joining the tibbles ----
 
-# joining tables
+# joining tibbles
 get_store_locations <-
   function(store_locations_tbl, us_locations_tbl) {
-    # This table tells us all the unique store locations
+    # This tibble tells us all the unique store locations
     filtered_store_locations_tbl <- store_locations_tbl %>%
+      mutate(zip = as.character(zip)) %>%
       left_join(us_locations_tbl)
     
     saveRDS(object = filtered_store_locations_tbl, file = "../R/filtered_store_locations_tbl.rds")
@@ -168,7 +169,7 @@ get_store_locations <-
     return(filtered_store_locations_tbl)
   }
 
-# this table discovers the three brands that have the most data in the dataset
+# this tibble discovers the three brands that have the most data in the dataset
 # to limit the amount of data in the model
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   # filtering for non-negatives and counting rows by UPCS
@@ -185,7 +186,7 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
 }
 
 
-# this table joins all the relevant tables
+# this tibble joins all the relevant tibbles
 get_sales <-
   function(descriptions_tbl,
            prices_tbl,
@@ -220,7 +221,7 @@ get_sales <-
 
 # 2.4 Modified Datasets ----
 
-# this table takes a sample of 1000 for the bootstrap
+# this tibble takes a sample of 1000 for the bootstrap
 get_sales_sample <- function(sales_tbl) {
   #selecting a sample from each brand
   sales_sample_tbl <- sales_tbl %>%
@@ -242,7 +243,7 @@ dump("input_illinois_map",
      file = "../R/map_template.R")
 
 dump(c("get_store_locations", "get_top_three", "get_sales"),
-     file = "../R/joining_tables.R")
+     file = "../R/joining_tibbles.R")
 
 dump(c("get_sales_sample"),
      file = "../R/modified_datasets.R")
