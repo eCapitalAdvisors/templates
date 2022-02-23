@@ -260,6 +260,49 @@ product_summary_wide_tbl <- product_summary_tbl %>%
   pivot_longer(c(Unit_Sales:Gross_Margin_Pct), names_to = "Metric", values_to = "Value") %>%
   pivot_wider(names_from = Year, values_from = Value)
 
+
+# 3.0 BOOTSTRAP MODEL ----
+
+# 3.1 Create Model ----
+
+get_bootstrap <- function(sales_tbl) {
+  
+  # bootstrap
+  sales_tbl %>%
+    mutate(sales = log(sales), price = log(price)) %>%
+    specify(formula = sales ~ price) %>%
+    generate(reps = 1000, type = "bootstrap") %>%
+    calculate(stat = "slope")
+}
+
+get_betas <- function(sales_tbl) {
+  
+  # obtain betas
+  bootstrap_tbl <- sales_tbl %>%
+    group_by(description) %>%
+    nest() %>%
+    mutate(bootstrap_slopes = purrr::map(data, get_bootstrap))
+  
+  saveRDS(object = bootstrap_tbl, file = "../R/bootstrap_tbl.rds")
+  
+  return(bootstrap_tbl)
+}
+
+# obtain confidence interval for bootstrap
+get_ci_for_bootstrap <- function(bootstrap_tbl) {
+  
+  ci <- bootstrap_tbl %>%
+    mutate(perc_ci = purrr::map(bootstrap_slopes, get_confidence_interval, level = 0.95, type = 'percentile')) %>%
+    unnest(perc_ci)
+  
+  saveRDS(object = ci, file = "../R/ci.rds")
+  
+  return(ci)
+}
+
+
+# 4.0 VISUALS: UNDERSTAND THE DATA ----
+
 product_summary_tbl %>%
   ggplot(aes(x = Year, y = Revenue, fill = DESCRIP)) +
   geom_bar(position = "stack", stat = "identity") +

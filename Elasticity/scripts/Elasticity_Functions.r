@@ -37,10 +37,10 @@ library(rromeo)
 
 ## Read Data
 
-descriptions_path <- "raw_data_cereal_descriptions.xlsx"
-prices_path <- "raw_data_cereal_prices.xlsx"
+descriptions_path <- "raw_data_cereal_descriptions.csv"
+prices_path <- "raw_data_cereal_prices.csv"
 store_locations_path <- "demo.dta"
-us_locations_path <- "uszips.xlsx"
+us_locations_path <- "uszips.csv"
 
 # Google API key
 maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
@@ -53,7 +53,7 @@ maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
 # selecting variables of choice, renaming the variables and standardizing label names
 input_descriptions <- function(descriptions_path) {
   # importing file
-  descriptions_tbl <- read_excel(descriptions_path) %>%
+  descriptions_tbl <- read_csv(descriptions_path) %>%
     select(UPC, DESCRIP) %>%
     rename(description = DESCRIP) %>%
     mutate(
@@ -72,7 +72,7 @@ input_descriptions <- function(descriptions_path) {
 # selecting the variables of choice, renaming the variable names
 input_prices <- function(prices_path) {
   # importing file
-  prices_tbl <- read_excel(prices_path) %>%
+  prices_tbl <- read_csv(prices_path) %>%
     select(STORE, UPC, WEEK, MOVE, PRICE) %>%
     filter(PRICE > 0) %>%
     filter(MOVE > 0) %>%
@@ -107,7 +107,7 @@ input_store_locations <- function(store_locations_path) {
 # selecting variables of choice
 input_us_locations <- function(us_locations_path) {
   #importing file
-  us_locations_tbl <- read_excel(us_locations_path) %>%
+  us_locations_tbl <- read_csv(us_locations_path) %>%
     select(zip, state_name)
   
   saveRDS(object = us_locations_tbl, file = "../R/us_locations_tbl.rds")
