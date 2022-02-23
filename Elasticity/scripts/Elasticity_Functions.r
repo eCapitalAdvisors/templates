@@ -48,7 +48,7 @@ maps_api_key <- Sys.getenv("SHERPAROMEO_KEY")
 
 # 2.0 PREPROCESS DATA ----
 
-# 2.1 Cleaning the Table ----
+# 2.1 Cleaning the tibble ----
 
 # selecting variables of choice, renaming the variables and standardizing label names
 input_descriptions <- function(descriptions_path) {
@@ -154,12 +154,12 @@ input_google_map <- function(maps_api_key) {
   register_google(key = maps_api_key)
 }
 
-# 2.3 Joining the Tables ----
+# 2.3 Joining the tibbles ----
 
-# joining tables
+# joining tibbles
 get_store_locations <-
   function(store_locations_tbl, us_locations_tbl) {
-    # This table tells us all the unique store locations
+    # This tibble tells us all the unique store locations
     filtered_store_locations_tbl <- store_locations_tbl %>%
       left_join(us_locations_tbl)
     
@@ -168,7 +168,7 @@ get_store_locations <-
     return(filtered_store_locations_tbl)
   }
 
-# this table discovers the three brands that have the most data in the dataset
+# this tibble discovers the three brands that have the most data in the dataset
 # to limit the amount of data in the model
 get_top_three <- function(descriptions_tbl, prices_tbl) {
   # filtering for non-negatives and counting rows by UPCS
@@ -185,7 +185,7 @@ get_top_three <- function(descriptions_tbl, prices_tbl) {
 }
 
 
-# this table joins all the relevant tables
+# this tibble joins all the relevant tibbles
 get_sales <-
   function(descriptions_tbl,
            prices_tbl,
@@ -220,7 +220,7 @@ get_sales <-
 
 # 2.4 Modified Datasets ----
 
-# this table takes a sample of 1000 for the bootstrap
+# this tibble takes a sample of 1000 for the bootstrap
 get_sales_sample <- function(sales_tbl) {
   #selecting a sample from each brand
   sales_sample_tbl <- sales_tbl %>%
@@ -242,7 +242,7 @@ dump("input_illinois_map",
      file = "../R/map_template.R")
 
 dump(c("get_store_locations", "get_top_three", "get_sales"),
-     file = "../R/joining_tables.R")
+     file = "../R/joining_tibbles.R")
 
 dump(c("get_sales_sample"),
      file = "../R/modified_datasets.R")
