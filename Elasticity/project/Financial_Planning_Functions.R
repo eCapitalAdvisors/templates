@@ -54,7 +54,7 @@ product_detail_tbl <- prices_tbl %>%
       `APPLE CINNAMON CHERR` = "Apple Cinnamon Cheerios",
       CHEERIOS = "Cheerios",
       `CINNAMON TOAST CRUNC` = "Cinnamon Toast Crunch",
-      `G.M FIBER ONE` = "Fiber One",
+      `G.M. FIBER ONE` = "Fiber One",
       `HONEY NUT CHEERIOS` = "Honey Nut Cheerios",
       KIX = "Kix",
       `NABISCO WHEAT N BRAN` = "Wheat 'N Bran",
@@ -101,9 +101,13 @@ product_summary_tbl %>%
   ggplot(aes(x = Year, y = Revenue, fill = DESCRIP)) +
   geom_bar(position = "stack", stat = "identity") +
   scale_x_discrete(limits = seq(1989, 1997)) +
+  scale_y_continuous(labels = scales::dollar_format()) +
   scale_fill_discrete(name = "Cereal Brands")
 
 product_summary_tbl %>%
   ggplot(aes(x = Year, y = Revenue, group = DESCRIP, color = DESCRIP)) +
-  geom_line()
+  geom_line() +
+  scale_x_discrete(limits = seq(1989, 1997)) +
+  scale_color_discrete("Cereal Brands") +
+  scale_y_continuous(labels = scales::dollar_format())
 
