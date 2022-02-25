@@ -1,0 +1,466 @@
+---
+title: "Price Elasticity Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    theme: bootstrap
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(shinyWidgets)
+library(shinyjs)
+
+# Core
+library(tidyverse)
+library(lubridate)
+
+# Data Modeling
+library(infer)
+```
+
+
+```{r import, include=FALSE}
+product_summary_tbl <- read_rds("../data/product_summary.RDS")
+
+product_analysis_tbl <- read_rds("../data/product_analysis.RDS")
+```
+
+Sidebar {.sidebar data-width=350}
+===============================================================
+
+```{r}
+useShinyjs(rmd = TRUE)
+
+shinyWidgets::pickerInput(
+  inputId  = "picker_product", 
+  label    = h4("Product"), 
+  choices  = unique(product_summary_tbl$DESCRIP), 
+  selected = c("Frosted Flakes", "Rice Krispies", "Corn Flakes"), 
+  multiple = TRUE,
+  options  = list(
+    `actions-box` = TRUE,
+    size = 10,
+    `selected-text-format` = "count > 2",
+    `live-search` = TRUE
+  )
+)
+
+shinyWidgets::pickerInput(
+  inputId  = "picker_location", 
+  label    = h4("Location"), 
+  choices  = unique(product_summary_tbl$CITY), 
+  selected = "Chicago", 
+  multiple = TRUE,
+  options  = list(
+    `actions-box` = TRUE,
+    size = 10,
+    `selected-text-format` = "count > 3",
+    `live-search` = TRUE
+  )
+)
+
+shinyWidgets::pickerInput(
+  inputId  = "picker_period", 
+  label    = h4("Period"), 
+  choices  = unique(product_summary_tbl$YEAR), 
+  selected = unique(product_summary_tbl$YEAR), 
+  multiple = TRUE,
+  options  = list(
+    `actions-box` = TRUE,
+    size = 10,
+    `selected-text-format` = "count > 3"
+  )
+)
+
+br()
+hr()
+br()
+
+actionButton(inputId = "apply", label = "Apply", icon = icon("play"))
+
+actionButton(inputId = "reset", label = "Reset", icon = icon("sync"))
+
+observeEvent(eventExpr = input$reset, handlerExpr = {
+  
+  
+  updatePickerInput(
+    session = session, 
+    inputId = "picker_product", 
+    selected = c("Frosted Flakes", "Rice Krispies", "Corn Flakes"))
+  
+  updatePickerInput(
+    session = session,
+    inputId = "picker_location",
+    selected = "Chicago"
+  )
+  
+  updatePickerInput(
+    session = session,
+    inputId = "picker_period",
+    selected = unique(product_summary_tbl$YEAR)
+  )
+  
+  shinyjs::delay(ms = 300, expr = {
+    shinyjs::click(id = "apply")
+  })
+ 
+  
+})
+```
+
+```{r filter}
+product_summary_filtered_tbl <- eventReactive(
+  eventExpr = input$apply, 
+                                             
+  valueExpr = {
+  
+    product_summary_tbl %>%
+      
+      filter(DESCRIP %in% input$picker_product) %>%
+      
+      filter(CITY %in% input$picker_location) %>%
+      
+      filter(YEAR %in% input$picker_period)
+    
+  },
+  ignoreNULL = FALSE
+)
+
+
+
+product_analysis_filtered_tbl <- eventReactive(
+  eventExpr = input$apply, 
+                                             
+  valueExpr = {
+  
+    product_analysis_tbl %>%
+      
+      filter(DESCRIP %in% input$picker_product) %>%
+      
+      filter(CITY %in% input$picker_location) %>%
+      
+      filter(YEAR %in% input$picker_period)
+    
+  },
+  ignoreNULL = FALSE
+)
+```
+
+```{r model}
+product_elasticity_slopes_tbl <- reactive({
+  
+  product_analysis_filtered_tbl() %>%
+    specify(formula = LOG_QUANTITY ~ LOG_PRICE) %>%
+    generate(reps = 100, type = "bootstrap") %>%
+    calculate(stat = "slope")
+  
+})
+
+product_elasticity_ci_tbl <- reactive({
+  
+  product_elasticity_slopes_tbl() %>%
+    get_confidence_interval(type = "percentile", level = 0.95)
+  
+})
+```
+
+Sales Overview
+===============================================================
+
+Row {data-height=150}
+---------------------------------------------------------------
+
+```{r}
+kpi_tbl <- reactive({
+  
+  product_summary_filtered_tbl() %>%
+    summarize(
+      UNIT_SALES = sum(UNIT_SALES),
+      REVENUE = sum(REVENUE),
+      GROSS_MARGIN = sum(GROSS_MARGIN),
+      GROSS_MARGIN_PCT = round(sum(GROSS_MARGIN) / sum(UNIT_SALES), 2)
+    )
+  
+})
+```
+
+
+### Unit Sales
+
+```{r}
+renderValueBox({
+
+  valueBox(
+    value   = kpi_tbl()$UNIT_SALES %>% scales::comma(),
+    caption = "Unit Sales"
+  )
+
+})
+```
+
+
+### Gross Revenue
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value   = kpi_tbl()$REVENUE %>% scales::dollar(), 
+    caption = "Gross Revenue"
+  )
+  
+})
+```
+
+### Gross Margin
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value   = kpi_tbl()$GROSS_MARGIN %>% scales::dollar(), 
+    caption = "Gross Margin"
+  )
+  
+})
+```
+
+### Gross Margin %
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value   = kpi_tbl()$GROSS_MARGIN_PCT %>% scales::percent(accuracy = 2), 
+    caption = "Gross Margin %"
+  )
+  
+})
+```
+
+Row {data-height=450}
+---------------------------------------------------------------
+
+### Revenue Contribution by Product
+
+```{r}
+output$plot_1 <- renderPlot({
+  
+  product_summary_filtered_tbl() %>%
+    ggplot(aes(x = YEAR, y = REVENUE, fill = DESCRIP)) +
+    geom_bar(position = "stack", stat = "identity") +
+    ylab("Revenue") +
+    xlab("Year") +
+    scale_x_discrete(limits = seq(1989, 1997)) +
+    scale_y_continuous(labels = scales::dollar_format()) +
+    scale_fill_discrete(name = "Product")
+  
+})
+
+plotOutput(outputId = "plot_1")
+```
+
+### Revenue Trend by Product
+
+```{r}
+output$plot_2 <- renderPlot({
+  
+  product_summary_filtered_tbl() %>%
+    ggplot(aes(x = YEAR, y = REVENUE, group = DESCRIP, color = DESCRIP)) +
+    geom_line() +
+    ylab("Revenue") +
+    xlab("Year") +
+    scale_x_discrete(limits = seq(1989, 1997)) +
+    scale_y_continuous(labels = scales::dollar_format()) +
+    scale_color_discrete("Product")
+  
+})
+
+plotOutput(outputId = "plot_2")
+```
+
+
+Row {data-height=450}
+---------------------------------------------------------------
+
+```{r}
+product_summary_wide_tbl <- reactive({
+  
+  product_summary_filtered_tbl() %>%
+    pivot_longer(c(UNIT_SALES:GROSS_MARGIN_PCT),
+                 names_to = "METRIC",
+                 values_to = "VALUE") %>%
+    pivot_wider(names_from = YEAR, values_from = VALUE) %>%
+    rename(Product = DESCRIP, Location = CITY, Indicator = METRIC) %>%
+    mutate(
+      Indicator = recode(
+        Indicator,
+        UNIT_SALES = "Unit Sales",
+        UNIT_SALES_GROWTH = "Unit Sales Y/Y Growth",
+        AVG_RETAIL_PRICE = "Average Selling Price (ASP)",
+        BUNDLE_SALES = "Bundle Sales",
+        REVENUE = "Revenue",
+        REVENUE_PCT = "Revenue %",
+        GROSS_MARGIN = "Gross Margin",
+        GROSS_MARGIN_PCT = "Gross Margin %"
+      )
+    )
+  
+})
+```
+
+
+### Product Detail
+
+```{r}
+output$table_1 <- renderTable({
+  
+  product_summary_wide_tbl()
+  
+}, hover = TRUE)
+
+tableOutput(outputId = "table_1")
+```
+
+
+Statistical Analysis
+===============================================================
+
+```{r}
+asp_tbl <- reactive({
+  
+  product_analysis_filtered_tbl() %>%
+    summarize(
+      AVG_RETAIL_PRICE = mean(exp(LOG_PRICE))
+    )
+  
+})
+
+elasticity_label_tbl <- reactive({
+  
+  product_elasticity_ci_tbl() %>%
+    mutate(
+      label = case_when(
+        (lower_ci < -1) & (upper_ci < -1) ~ "Elastic",
+        ((lower_ci > -1) & (upper_ci > -1)) & ((lower_ci < 0) & (upper_ci < 0)) ~ "Inelastic",
+        TRUE ~ "Inconclusive"
+      )
+    )
+  
+})
+```
+
+Row {data-height=150}
+---------------------------------------------------------------
+
+### Average Unit Price
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value   = asp_tbl()$AVG_RETAIL_PRICE %>% scales::dollar(), 
+    caption = "Average Selling Price (ASP)"
+  )
+  
+})
+```
+
+### Elasticity Label
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value = elasticity_label_tbl()$label, 
+    caption = "Elasticity Label"
+  )
+  
+})
+```
+
+### Lower Bound
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value = round(product_elasticity_ci_tbl()$lower_ci, 2), 
+    caption = "Lower Bound"
+  )
+  
+})
+```
+
+### Upper Bound
+
+```{r}
+renderValueBox({
+  
+  valueBox(
+    value = round(product_elasticity_ci_tbl()$upper_ci, 2), 
+    caption = "Upper Bound"
+  )
+  
+})
+```
+
+Row {data-height=450}
+---------------------------------------------------------------
+  
+### Correlation Between Sales and Price
+  
+```{r}
+output$plot_3 <- renderPlot({
+  
+  product_analysis_filtered_tbl() %>%
+    ggplot(aes(x = LOG_PRICE, y = LOG_QUANTITY)) +
+    geom_point(aes(color = DESCRIP), alpha = 0.5) +
+    geom_smooth(se = FALSE, method = lm, color = "black") +
+    xlab("Unit Price (Log Scale)") +
+    ylab("Unit Sales / Bundle Sales (Log Scale)") +
+    scale_x_continuous(labels = scales::dollar_format()) +
+    scale_color_discrete(name = "Product")
+  
+})
+
+plotOutput(outputId = "plot_3")
+```
+
+### Bootstrap Slopes Distribution
+
+```{r}
+output$plot_4 <- renderPlot({
+
+  product_elasticity_slopes_tbl() %>%
+    ggplot(aes(x = stat)) +
+    geom_histogram() +
+    geom_vline(xintercept = product_elasticity_ci_tbl()$lower_ci, linetype = "dashed", size = 1.25, color = "blue") +
+    geom_vline(xintercept = product_elasticity_ci_tbl()$upper_ci, linetype = "dashed", size = 1.25, color = "blue") +
+    xlab("Bootstrap Slopes (100 simulations)") +
+    ylab("Frequency")
+
+})
+
+plotOutput(outputId = "plot_4")
+```
+
+
+Row {data-height=450}
+---------------------------------------------------------------
+  
+### Product Detail
+  
+```{r}
+output$table_2 <- renderTable({
+  
+  product_summary_wide_tbl()
+  
+}, hover = TRUE)
+
+tableOutput(outputId = "table_2")
+```
