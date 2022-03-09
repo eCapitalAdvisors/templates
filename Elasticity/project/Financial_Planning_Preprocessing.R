@@ -131,13 +131,106 @@ read_csv(prices_path) %>%
   ) %>%
   write_rds("../data/product_detail.RDS")
 
+product_detail_tbl <- readRDS("../data/product_detail.RDS")
+
 product_lookup_tbl <- product_detail_tbl %>%
   group_by(DESCRIP) %>%
   summarize(DISTINCT_YEAR = n_distinct(YEAR),
             SAMPLE_SIZE = n()) %>%
-  filter(DISTINCT_YEAR == 9)
+  filter(DISTINCT_YEAR == 9) %>%
+  mutate(
+    MANU = case_when(
+      DESCRIP %in% c("Dominick's Oat Honey",
+                     "Dominick's Oat Honey Raisin") ~ "Dominick's",
+      DESCRIP %in% c(
+        "Apple Cinnamon Cheerios",
+        "Cheerios",
+        "Cinnamon Toast Crunch",
+        "Cocoa Puffs",
+        "Cookie Crisp",
+        "Count Chocula",
+        "Crispy Wheats & Raisins",
+        "Fiber One",
+        "Kaboom",
+        "Golden Grahams",
+        "Honey Nut Cheerios",
+        "Kix",
+        "Lucky Charms",
+        "Oatmeal Crisp",
+        "Corn Chex",
+        "Rice Chex",
+        "Wheat Chex",
+        "Total Raisin Bran",
+        "S'mores Crunch",
+        "Total",
+        "Total Corn Flakes",
+        "Trix",
+        "Wheaties",
+        "Total Whole Grain"
+      ) ~ "General Mills",
+      DESCRIP %in% c(
+        "Nutri Grain Almond",
+        "All-Bran",
+        "Apple Jacks",
+        "Bite Size Frosted Mini-Wheats",
+        "Cocoa Krispies",
+        "Corn Flakes",
+        "Corn Pops",
+        "Cracklin' Oat Bran",
+        "Crispix",
+        "Froot Loops",
+        "Honey Smacks",
+        "Just Right",
+        "Nut & Honey Crunch",
+        "Nutri-Grain",
+        "Product 19",
+        "Raisin Bran",
+        "Rice Krispies",
+        "Special K",
+        "Special K Strawberry",
+        "Special K Apple Cinammon",
+        "Special K Blueberry",
+        "Frosted Flakes",
+        "Kellogg's Variety Pack",
+        "Raisin Squares",
+        "Just Right",
+        "Frosted Mini-Wheats"
+      ) ~ "Kellogg's",
+      DESCRIP %in% c("Spoon Size Shredded Wheat",
+                   "Shredded Wheat",
+                   "Wheat 'N Bran") ~ "Nabisco",
+      DESCRIP %in% c(
+        "Honey Bunches of Oats with Almonds",
+        "Honey Bunches of Oats with Raisins",
+        "Alpha-Bits",
+        "Cocoa PEBBLES",
+        "Fruit & Fibre",
+        "Fruity PEBBLES",
+        "Grape-Nuts",
+        "Grape-Nuts Flakes",
+        "Honeycomb",
+        "Natural Raisin Bran",
+        "Post Raisin Bran",
+        "Sugar Crisp",
+        "Natural Bran Flakes"
+      ) ~ "Post",
+      DESCRIP %in% c(
+        "Cap'n Crunch Christmas",
+        "Cap'n Crunch",
+        "Cap'n Crunch Jumbo",
+        "Popeye Puffed Rice",
+        "Popeye Puffed Wheat",
+        "100% Natural Cereal",
+        "Life",
+        "Life Cinnamon",
+        "Oatmeal Squares",
+        "Peanut Butter Squares",
+        "Puffed Rice",
+        "Oat Bran"
+      ) ~ "Quaker Oats"
+    )
+  )
 
-# Lila: add product manufacturer as new column `MANU` in this pipe
 product_total_tbl <- product_detail_tbl %>%
   inner_join(product_lookup_tbl, by = "DESCRIP") %>%
   group_by(YEAR) %>%
@@ -146,7 +239,10 @@ product_total_tbl <- product_detail_tbl %>%
 
 product_summary_tbl <- product_detail_tbl %>%
   inner_join(product_lookup_tbl , by = "DESCRIP") %>%
-  group_by(DESCRIP, CITY, YEAR) %>%
+  group_by(DESCRIP,
+           MANU,
+           CITY,
+           YEAR) %>%
   summarize(
     UNIT_SALES = sum(MOVE),
     AVG_RETAIL_PRICE = mean(PRICE),
@@ -166,6 +262,7 @@ product_summary_tbl <- product_detail_tbl %>%
     GROSS_MARGIN_PCT = GROSS_MARGIN / TOTAL_GROSS_MARGIN * 100
   ) %>%
   select(
+    MANU,
     DESCRIP,
     CITY,
     YEAR,
@@ -185,7 +282,8 @@ product_summary_tbl %>%
 product_detail_tbl %>%
   inner_join(product_lookup_tbl , by = "DESCRIP") %>%
   mutate(LOG_QUANTITY = log(MOVE / QTY),
-         LOG_PRICE = log(PRICE)) %>%
+         LOG_PRICE = log(PRICE),
+         YEAR = YEAR + 25) %>%
   select(DESCRIP, CITY, YEAR, LOG_QUANTITY, LOG_PRICE) %>%
   write_rds("../data/product_analysis.RDS")
 
