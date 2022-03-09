@@ -36,6 +36,19 @@ Sidebar {.sidebar data-width=350}
 useShinyjs(rmd = TRUE)
 
 shinyWidgets::pickerInput(
+  inputId  = "picker_manu", 
+  label    = h4("Manufacturer"), 
+  choices  = unique(product_summary_tbl$MANU), 
+  selected = c("Kellogg's"), 
+  multiple = TRUE,
+  options  = list(
+    `actions-box` = TRUE,
+    size = 10,
+    `selected-text-format` = "count > 2"
+  )
+)
+
+shinyWidgets::pickerInput(
   inputId  = "picker_product", 
   label    = h4("Product"), 
   choices  = unique(product_summary_tbl$DESCRIP), 
@@ -86,11 +99,17 @@ actionButton(inputId = "reset", label = "Reset", icon = icon("sync"))
 
 observeEvent(eventExpr = input$reset, handlerExpr = {
   
+  updatePickerInput(
+    session = session, 
+    inputId = "picker_manu", 
+    selected = c("Kellogg's")
+  )
   
   updatePickerInput(
     session = session, 
     inputId = "picker_product", 
-    selected = c("Frosted Flakes", "Rice Krispies", "Corn Flakes"))
+    selected = c("Frosted Flakes", "Rice Krispies", "Corn Flakes")
+  )
   
   updatePickerInput(
     session = session,
@@ -110,7 +129,46 @@ observeEvent(eventExpr = input$reset, handlerExpr = {
  
   
 })
+
+
+manufacturer <- reactive({
+  
+  product_summary_tbl %>%
+    filter(MANU %in% input$picker_manu)
+  
+})
+
+
+observeEvent(manufacturer(), {
+  
+  choices <- unique(manufacturer()$DESCRIP)
+    
+  updatePickerInput(
+    session = session, 
+    inputId = "picker_product", 
+    choices = choices
+  ) 
+  
+})
+
+br()
+hr()
+br()
 ```
+
+#### Definitions
+
+**Elasticity** - Percentage change in Sales following a 1% change in Price.
+
+**Inelastic** - Sales change *less* than 1% following a 1% change in Price. (Price Increase -> Revenue Gain)
+
+**Elastic** - Sales change *more* than 1% following a 1% change in Price. (Price Increase -> Revenue Loss)
+
+**Example**  
+
+A 1% increase in ASP from $3.13 to $3.16 will decrease sales between 1.54% and 1.50%. This results in an expected revenue loss.
+
+
 
 ```{r filter}
 product_summary_filtered_tbl <- eventReactive(
@@ -152,19 +210,19 @@ product_analysis_filtered_tbl <- eventReactive(
 
 ```{r model}
 product_elasticity_slopes_tbl <- reactive({
-  
+
   product_analysis_filtered_tbl() %>%
     specify(formula = LOG_QUANTITY ~ LOG_PRICE) %>%
     generate(reps = 100, type = "bootstrap") %>%
     calculate(stat = "slope")
-  
+
 })
 
 product_elasticity_ci_tbl <- reactive({
-  
+
   product_elasticity_slopes_tbl() %>%
     get_confidence_interval(type = "percentile", level = 0.95)
-  
+
 })
 ```
 
@@ -255,7 +313,7 @@ output$plot_1 <- renderPlot({
     geom_bar(position = "stack", stat = "identity") +
     ylab("Revenue") +
     xlab("Year") +
-    scale_x_discrete(limits = seq(1989, 1997)) +
+    scale_x_discrete(limits = seq(2014, 2022)) +
     scale_y_continuous(labels = scales::dollar_format()) +
     scale_fill_discrete(name = "Product")
   
@@ -274,7 +332,7 @@ output$plot_2 <- renderPlot({
     geom_line() +
     ylab("Revenue") +
     xlab("Year") +
-    scale_x_discrete(limits = seq(1989, 1997)) +
+    scale_x_discrete(limits = seq(2014, 2022)) +
     scale_y_continuous(labels = scales::dollar_format()) +
     scale_color_discrete("Product")
   
@@ -295,7 +353,7 @@ product_summary_wide_tbl <- reactive({
                  names_to = "METRIC",
                  values_to = "VALUE") %>%
     pivot_wider(names_from = YEAR, values_from = VALUE) %>%
-    rename(Product = DESCRIP, Location = CITY, Indicator = METRIC) %>%
+    rename(Manufacturer = MANU, Product = DESCRIP, Location = CITY, Indicator = METRIC) %>%
     mutate(
       Indicator = recode(
         Indicator,
@@ -341,7 +399,7 @@ asp_tbl <- reactive({
 })
 
 elasticity_label_tbl <- reactive({
-  
+
   product_elasticity_ci_tbl() %>%
     mutate(
       label = case_when(
@@ -350,7 +408,7 @@ elasticity_label_tbl <- reactive({
         TRUE ~ "Inconclusive"
       )
     )
-  
+
 })
 ```
 
