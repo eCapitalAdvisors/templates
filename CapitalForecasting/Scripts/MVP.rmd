@@ -1,0 +1,96 @@
+---
+title: "MVP"
+output: html_document
+date: '2022-06-27'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Today:
+* Create an evaluation function
+* Create a train/test split function
+* Make model multivariate (How? What data would be available before hand? Should it be assumption data? Could I use predictions of the other series for the prediction of this series?)
+
+To do:
+* Make it so multiple series can easily be modeled
+* Allow users to fiddle with inputs/expected future levels of stuff
+* Ensemble forecasting
+* Time series cross-validation
+
+```{r}
+library(tidyverse)
+library(tsibble)
+library(fable)
+library(GGally)
+library(feasts)
+```
+
+```{r fake data}
+df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
+df$date <- as.Date(as.character(df$date), format="%m/%d/%Y")
+```
+```{r}
+# convert to tsibble and add working capital and current ratio
+df %>%
+  mutate(date = yearmonth(as.character(date)),
+         working_capital = rev(working_capital)) %>%
+  as_tsibble(index = date)
+
+work_cap <- df %>%
+  mutate(date = yearmonth(as.character(date)),
+         working_capital = working_capital) %>%
+  filter(row_number() <= n() - 12) %>%
+  as_tsibble(index = date)
+```
+```{r}
+ggplot(work_cap, aes(date, working_capital)) +
+  geom_line()
+```
+
+
+```{r}
+arima_fit <- work_cap %>%
+  model(auto = ARIMA(
+    working_capital,
+    stepwise = TRUE,
+    approximation = FALSE
+  ))
+arima_fit %>% select(auto) %>% gg_tsresiduals(lag = 24)
+```
+
+```{r}
+forecast(arima_fit, h = "1 year") %>%
+  # filter(.model=='auto') %>% # For if there are multiple models in arima_fit
+  autoplot(df)
+```
+
+```{r}
+forecast(arima_fit, h = "1 year") %>%
+  accuracy(data = work_cap_full, measures = c(crps = CRPS, rmse = RMSE))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
