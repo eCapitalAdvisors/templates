@@ -69,35 +69,26 @@ work_cap %>%
   components() %>%
   autoplot()
 
+# more specific seasonality
+work_cap %>%
+  gg_tsdisplay(difference(working_capital),
+               plot_type = 'partial',
+               lag = 36) + labs(title = 'seasonal')
 
+# differencing
+ggplot(work_cap, aes(date, difference(working_capital))) +
+  geom_line()
 
+# simulating models
+simulation <- generate(arima_fit, h = 36, times = 20) %>%
+  filter(.model == 'auto')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+df %>%
+  filter(row_number() >= n() - 100) %>%
+  autoplot(working_capital) +
+  geom_line(
+    aes(y = .sim, group = .rep),
+    alpha = .2,
+    color = 'red',
+    data = simulation
+  )

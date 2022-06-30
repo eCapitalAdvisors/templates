@@ -1,0 +1,121 @@
+---
+title: "r4ds week 4"
+output: html_document
+date: '2022-06-21'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a sandbox file for me to try stuff out.
+
+
+```{r, packages, results=FALSE, echo=FALSE}
+library(tidyverse)
+library(tsibble)
+library(fable)
+library(GGally)
+library(feasts)
+library(knitr)
+```
+
+```{r, fake data, results=FALSE, echo=FALSE}
+# This is some time series data I found on the internet I transformed a bit
+df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
+```
+
+```{r, tidying, results=FALSE, echo=FALSE}
+# convert to tsibble and add working capital and current ratio
+df$date <- as.Date(as.character(df$date), format = "%m/%d/%Y")
+df <- df %>%
+  mutate(date = yearmonth(as.character(date)),
+         working_capital = working_capital) %>%
+  as_tsibble(index = date)
+
+work_cap <- df %>%
+  filter(row_number() <= n() - 36) %>%
+  as_tsibble(index = date)
+```
+
+*Working Capital Forecasting Dashboard*
+This dashboard uses time series modeling to forecasting working capital levels.
+
+```{r, general graph, echo=FALSE}
+ggplot(work_cap, aes(date, working_capital)) +
+  geom_line() +
+  labs(x = "Date", y = "Working Capital (millions)")
+```
+
+
+```{r, modeling, echo=FALSE}
+arima_fit <- work_cap %>%
+  model(
+    auto = ARIMA(working_capital, stepwise = TRUE)
+  )
+
+forecast(arima_fit, h = "3 year") %>%
+  autoplot(filter(df, row_number() >= n()-100), level = NULL)
+```
+
+
+```{r}
+arima_fit %>% select(auto) %>% gg_tsresiduals(lag = 24)
+forecast(arima_fit, h = "3 year") %>%
+  # filter(.model=='auto') %>% # For if there are multiple models in arima_fit
+  autoplot(df)
+```
+
+
+```{r}
+forecast(arima_fit, h = "3 year") %>%
+  accuracy(data = df, measures = c(crps = CRPS, rmse = RMSE))
+```
+
+
+```{r}
+full_fit <- arima_fit %>%
+  refit(df)
+
+forecast(full_fit, h="3 year") %>%
+  autoplot(filter(df, row_number() >= n() - 50))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
