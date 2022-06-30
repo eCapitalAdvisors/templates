@@ -1,6 +1,8 @@
 ---
 title: "MVP"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 date: '2022-06-27'
 ---
 
@@ -8,21 +10,23 @@ date: '2022-06-27'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, packages, results=FALSE, echo=FALSE}
+```{r, packages, results="hide", echo=FALSE, message = FALSE}
 library(tidyverse)
 library(tsibble)
 library(fable)
 library(GGally)
 library(feasts)
 library(knitr)
+library(printr)
+library(DT)
 ```
 
-```{r, fake data, results=FALSE, echo=FALSE}
+```{r, fake data, results="hide", echo=FALSE, message = FALSE}
 # This is some time series data I found on the internet I transformed a bit
 df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
 ```
 
-```{r, tidying, results=FALSE, echo=FALSE}
+```{r, tidying, results="hide", echo=FALSE}
 # convert to tsibble and add working capital and current ratio
 df$date <- as.Date(as.character(df$date), format = "%m/%d/%Y")
 df <- df %>%
@@ -35,7 +39,8 @@ work_cap <- df %>%
   as_tsibble(index = date)
 ```
 
-*Working Capital Forecasting Dashboard*
+## Working Capital Forecasting Dashboard
+
 This dashboard uses time series modeling to forecasting working capital levels.
 
 ```{r, decomposition, echo=FALSE}
@@ -51,42 +56,58 @@ work_cap %>%
 
 ```{r, modeling, echo=FALSE}
 arima_fit <- work_cap %>%
-  model(
-    # ARIMA function automatically picks best fitting model using AIC
-    auto = ARIMA(working_capital, ic = 'aic', stepwise = FALSE)
-  )
+  model(# ARIMA function automatically picks best fitting model using AIC
+    auto = ARIMA(working_capital, ic = 'aic', stepwise = FALSE))
 # refit to all data
 full_fit <- arima_fit %>%
   refit(df)
 ```
 
 ```{r, simulation, echo=FALSE}
-simulation <- generate(full_fit, h = 36, times = 20) %>%
+simulation <- generate(full_fit, h = 36, times = 15) %>%
   filter(.model == 'auto')
 
 df %>%
   filter(row_number() >= n() - 150) %>%
-  autoplot(working_capital) + autolayer(simulation, .vars=.sim) + 
+  autoplot(working_capital) + autolayer(simulation, .vars = .sim) +
   geom_line() +
   theme(legend.position = "none") +
   ggtitle("Working Capital Simulation") +
-  labs(y="Working Capital (millions)", x="Date")
-
+  labs(y = "Working Capital (millions)", x = "Date")
 ```
 
 ```{r, conf int graph, echo=FALSE}
 forecast(full_fit, h = "3 year") %>%
-  autoplot(filter(df, row_number() >= n()-150), level = c(70, 90)) +
+  autoplot(filter(df, row_number() >= n() - 150), level = c(70, 90)) +
   ggtitle("Working Capital Forecast") +
-  labs(y="Working Capital (millions)", x="Date")
+  labs(y = "Working Capital (millions)", x = "Date")
 ```
+
+```{r, errors, echo=FALSE}
+kable(forecast(arima_fit, h = "3 year") %>%
+  accuracy(data = df, measures = c(crps = CRPS, rmse = RMSE)), col.names = c("Model", "Type", "CRPS", "RMSE"))
+```
+
 
 ```{r, table, echo=FALSE}
-print(forecast(full_fit, h = "3 year"))
+three_yr_forecast <- forecast(full_fit, h = "3 year") %>%
+  hilo(95) %>%
+  as_tibble() %>%
+  select(date, .mean, '95%') %>%
+  rename(forecast = .mean) %>%
+  rename(conf_int = '95%') %>%
+  unpack_hilo(conf_int)
+
+three_yr_forecast$forecast <- round(three_yr_forecast$forecast, 3)
+three_yr_forecast$date <- as.Date(three_yr_forecast$date)
+
+datatable(
+  three_yr_forecast,
+  class = 'cell-border stripe',
+  colnames = c("Date", "Forecast", "Lower bound", "Upper bound"),
+  caption = "Point forecast for working capital levels"
+)
 ```
-
-
-
 
 
 
