@@ -5,11 +5,9 @@ output:
   pdf_document: default
 date: '2022-06-27'
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 ```{r, packages, results="hide", echo=FALSE, message = FALSE}
 library(tidyverse)
 library(tsibble)
@@ -20,12 +18,10 @@ library(knitr)
 library(printr)
 library(DT)
 ```
-
 ```{r, fake data, results="hide", echo=FALSE, message = FALSE}
 # This is some time series data I found on the internet I transformed a bit
 df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
 ```
-
 ```{r, tidying, results="hide", echo=FALSE}
 # convert to tsibble and add working capital and current ratio
 df$date <- as.Date(as.character(df$date), format = "%m/%d/%Y")
@@ -41,7 +37,9 @@ work_cap <- df %>%
 
 ## Working Capital Forecasting Dashboard
 
-This dashboard uses time series modeling to forecasting working capital levels.
+This dashboard uses time series modeling to forecast future working capital levels.
+
+This graph decomposes working capital levels into three parts: Trend, season, and remainder. The trend shows longer business cycles, the season shows seasonal fluctuations, and the remainder shows what is unaccounted for by the trend and seasonal components.
 
 ```{r, decomposition, echo=FALSE}
 work_cap %>%
@@ -63,8 +61,10 @@ full_fit <- arima_fit %>%
   refit(df)
 ```
 
-```{r, simulation, echo=FALSE}
-simulation <- generate(full_fit, h = 36, times = 15) %>%
+The following graphs show three year forecasts for working capital levels. The first simulated five different paths working capital could take, while the second shows the expected path and the probability range around it.
+
+```{r, sample paths, echo=FALSE}
+simulation <- generate(full_fit, h = 36, times = 5) %>%
   filter(.model == 'auto')
 
 df %>%
@@ -78,16 +78,12 @@ df %>%
 
 ```{r, conf int graph, echo=FALSE}
 forecast(full_fit, h = "3 year") %>%
-  autoplot(filter(df, row_number() >= n() - 150), level = c(70, 90)) +
+  autoplot(filter(df, row_number() >= n() - 150), level = c(70, 95)) +
   ggtitle("Working Capital Forecast") +
   labs(y = "Working Capital (millions)", x = "Date")
 ```
 
-```{r, errors, echo=FALSE}
-kable(forecast(arima_fit, h = "3 year") %>%
-  accuracy(data = df, measures = c(crps = CRPS, rmse = RMSE)), col.names = c("Model", "Type", "CRPS", "RMSE"))
-```
-
+The following is a table that contains the forecasted working capital levels, as well as upper and lower bounds of the forecast. We are 95% sure working capital levels will be between the upper and lower bounds.
 
 ```{r, table, echo=FALSE}
 three_yr_forecast <- forecast(full_fit, h = "3 year") %>%
@@ -98,6 +94,10 @@ three_yr_forecast <- forecast(full_fit, h = "3 year") %>%
   rename(conf_int = '95%') %>%
   unpack_hilo(conf_int)
 
+three_yr_forecast$conf_int_lower <-
+  round(three_yr_forecast$conf_int_lower, 3)
+three_yr_forecast$conf_int_upper <-
+  round(three_yr_forecast$conf_int_upper, 3)
 three_yr_forecast$forecast <- round(three_yr_forecast$forecast, 3)
 three_yr_forecast$date <- as.Date(three_yr_forecast$date)
 
