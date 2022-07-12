@@ -1,36 +1,33 @@
 ---
-title: "r4ds week 4"
-output: html_document
+title: "sandbox"
+output: html_document: default
 date: '2022-06-21'
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-This is a sandbox file for me to try stuff out.
-
-
-```{r, packages, results=FALSE, echo=FALSE}
+```{r, packages, results="hide", echo=FALSE, message = FALSE}
 library(tidyverse)
 library(tsibble)
 library(fable)
 library(GGally)
 library(feasts)
 library(knitr)
+library(printr)
+library(DT)
+library(lubridate)
 ```
+"He who sees the past as surprise-free is bound to have a future full of surprises" -Amos Tversky
 
-```{r, fake data, results=FALSE, echo=FALSE}
+```{r, tidying, results="hide", echo=FALSE}
 # This is some time series data I found on the internet I transformed a bit
 df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
-```
-
-```{r, tidying, results=FALSE, echo=FALSE}
 # convert to tsibble and add working capital and current ratio
 df$date <- as.Date(as.character(df$date), format = "%m/%d/%Y")
 df <- df %>%
   mutate(date = yearmonth(as.character(date)),
-         working_capital = working_capital) %>%
+         working_capital = assets - liabilities) %>%
   as_tsibble(index = date)
 
 work_cap <- df %>%
@@ -38,71 +35,105 @@ work_cap <- df %>%
   as_tsibble(index = date)
 ```
 
-*Working Capital Forecasting Dashboard*
-This dashboard uses time series modeling to forecasting working capital levels.
+```{r}
+df_long <- df %>%
+  select(date, assets, liabilities) %>%
+  mutate(liabilities = -liabilities) %>%
+  pivot_longer(!date, values_to = "amount")
 
-```{r, general graph, echo=FALSE}
-ggplot(work_cap, aes(date, working_capital)) +
-  geom_line() +
-  labs(x = "Date", y = "Working Capital (millions)")
+# Hierarchical forecasting
+df_agg <- df_long %>%
+  aggregate_key(name, working_capital = sum(amount))
+
+fit <- df_agg %>%
+  filter(year(date) <= 2001) %>%
+  model(arima = ARIMA(working_capital),
+        ets = ETS(working_capital),
+        snaive = SNAIVE(working_capital ~ drift())) %>%
+  reconcile(mint_arima = min_trace(arima, method = "mint_shrink"),
+            mint_ets = min_trace(ets, method = "mint_shrink"),
+            mint_snaive = min_trace(snaive, method = "mint_shrink"))
+
+three_yr_forecast <- fit %>% forecast(h = "3 years 3 months")
+
+three_yr_forecast %>%
+  filter(.model == "mint_arima") %>%
+  autoplot(df_agg %>% filter(year(date) >= 1997))
+
+three_yr_forecast %>%
+  filter(is_aggregated(name)) %>%
+  filter(.model == "mint_arima" | .model == "mint_ets" | .model == "mint_snaive") %>%
+  autoplot(df_agg %>% filter(year(date) >= 1997)) +
+  labs(title = "Working Capital")
+
+three_yr_forecast %>%
+  filter(!is_aggregated(name)) %>%
+  filter(.model == "mint_arima") %>%
+  autoplot(df_agg %>% filter(year(date) >= 1997))
+
+three_yr_forecast
+```
+
+```{r}
+# modeling working capital, assets and liabilities
+arima_fit <- df_long %>%
+  model(auto = ARIMA(amount, ic = 'aic', stepwise = TRUE))
+
+three_yr_forecast <- forecast(arima_fit, h = "3 year")
+
+# plotting individual forecasts
+autoplot(
+  filter(three_yr_forecast, name == "assets"),
+  filter(df_long, row_number() >= n() - 150),
+  # level = seq(10, 90, by = 20),
+  color = "skyblue3",
+  show_gap = FALSE
+)
 ```
 
 
-```{r, modeling, echo=FALSE}
-arima_fit <- work_cap %>%
-  model(
-    auto = ARIMA(working_capital, stepwise = TRUE)
-  )
 
-forecast(arima_fit, h = "3 year") %>%
-  autoplot(filter(df, row_number() >= n()-100), level = NULL)
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ```{r}
-arima_fit %>% select(auto) %>% gg_tsresiduals(lag = 24)
-forecast(arima_fit, h = "3 year") %>%
-  # filter(.model=='auto') %>% # For if there are multiple models in arima_fit
-  autoplot(df)
+# cross validation
+cross_val <- work_cap %>% 
+  #slice(1:n()-1) %>% 
+  stretch_tsibble(.init = 24, .step = 6)
+
+cross_val
+work_cap
+
+cross_fit <- cross_val %>% 
+  model(arima = ARIMA(working_capital, stepwise = TRUE))
+
+cross_forecast <- forecast(cross_fit, h="3 years")
+
+accuracy(cross_forecast, df) %>% 
+  select(.model, RMSE:MAPE)
+
+# comparison to just train-test split
+work_cap %>%
+  model(# ARIMA function automatically picks best fitting model using AIC
+    arima = ARIMA(working_capital, stepwise=TRUE)) %>% 
+  forecast(h="3 years") %>% 
+  accuracy(df) %>% 
+  select(.model, RMSE:MAPE)
+
 ```
-
-
-```{r}
-forecast(arima_fit, h = "3 year") %>%
-  accuracy(data = df, measures = c(crps = CRPS, rmse = RMSE))
-```
-
-
-```{r}
-full_fit <- arima_fit %>%
-  refit(df)
-
-forecast(full_fit, h="3 year") %>%
-  autoplot(filter(df, row_number() >= n() - 50))
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
