@@ -8,7 +8,6 @@ library(lubridate)
 df <-  read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
 
 create_tsibble <- function(data, date) {
-  #data$date <- as.Date(as.character(data$date), format = "%m/%d/%Y")
   data %>%
     mutate(date = yearmonth(as.character(date))) %>%
     as_tsibble(index = date)
@@ -55,5 +54,3 @@ hier_data <- hier_data %>%
 
 # full data including predictions and actuals
 full_df <- union_all(hier_data, three_yr_forecast)
-full_df %>% 
-  filter(model == "mint_arima")
