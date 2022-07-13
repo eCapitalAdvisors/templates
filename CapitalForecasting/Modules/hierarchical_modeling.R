@@ -4,6 +4,7 @@ library(fable)
 library(feasts)
 library(lubridate)
 
+# sample data
 df <-  read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
 
 create_tsibble <- function(data, date) {
@@ -14,6 +15,7 @@ create_tsibble <- function(data, date) {
 }
 
 create_hierarchy <- function(data) {
+  # working capital is aggregated from assets and liabilities
   data %>%
     pivot_longer(!date, values_to = "dollars") %>%
     aggregate_key(name, dollars = sum(dollars))
@@ -23,6 +25,7 @@ hierarchical_modeling <- function(data, train_split_date) {
   data %>% 
     filter(year(date) <= train_split_date) %>% 
     model(arima = ARIMA(dollars)) %>% 
+    # asset forecast minus liabilities forecast equals working capital forecast
     reconcile(mint_arima = min_trace(arima, method = "mint_shrink")) %>% 
     refit(data)
 }
