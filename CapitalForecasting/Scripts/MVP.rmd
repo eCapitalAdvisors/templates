@@ -42,11 +42,6 @@ This dashboard uses time series modeling to forecast future working capital leve
 This graph decomposes working capital levels into three parts: Trend, season, and remainder. The trend shows longer business cycles, the season shows seasonal fluctuations, and the remainder shows what is unaccounted for by the trend and seasonal components.
 
 ```{r, decomposition, echo=FALSE}
-# stl_decomp <- model(work_cap, STL(working_capital ~ trend(window = 21) + season(window=13), robust = TRUE))
-# 
-# autoplot(work_cap, working_capital) + autolayer(components(stl_decomp), trend + season_year, color = "blue")
-
-
 work_cap %>%
   model(STL(working_capital ~ trend(window = 21) +
               season(window = 13),
@@ -61,8 +56,6 @@ work_cap %>%
 arima_fit <- work_cap %>%
   model(# ARIMA function automatically picks best fitting model using AIC
     arima = ARIMA(working_capital, ic = 'aic', stepwise = FALSE),
-    # ets = ETS(working_capital),
-    # snaive = SNAIVE(working_capital ~ drift())
     )
 # refit to all data
 full_fit <- arima_fit %>%

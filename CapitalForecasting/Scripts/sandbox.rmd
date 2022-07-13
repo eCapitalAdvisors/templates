@@ -18,6 +18,7 @@ library(printr)
 library(DT)
 library(lubridate)
 ```
+
 "He who sees the past as surprise-free is bound to have a future full of surprises" -Amos Tversky
 
 ```{r, tidying, results="hide", echo=FALSE}
@@ -92,22 +93,6 @@ autoplot(
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```{r}
 # cross validation
 cross_val <- work_cap %>% 
@@ -122,16 +107,14 @@ cross_fit <- cross_val %>%
 
 cross_forecast <- forecast(cross_fit, h="3 years")
 
-accuracy(cross_forecast, df) %>% 
-  select(.model, RMSE:MAPE)
+accuracy(cross_forecast, df, measures = c(crps = CRPS, mae = MAE))
 
 # comparison to just train-test split
 work_cap %>%
   model(# ARIMA function automatically picks best fitting model using AIC
     arima = ARIMA(working_capital, stepwise=TRUE)) %>% 
   forecast(h="3 years") %>% 
-  accuracy(df) %>% 
-  select(.model, RMSE:MAPE)
+  accuracy(df, measures = c(crps = CRPS, mae = MAE))
 
 ```
 

@@ -4,27 +4,6 @@ library(fable)
 library(GGally)
 library(feasts)
 
-
-# making some fake data
-set.seed(42)
-date <- seq(as.Date("2010-01-01"), as.Date("2020-01-01"), "weeks")
-# x <- rnorm(n = length(date), mean = 10, sd = 5)
-# y <- x * 2 + 10 * rnorm(length(date))
-time_series_data <- function(mean, sd) {
-  # should make this more seasonal
-  column <- c(0)
-  for (i in 1:length(date)) {
-    if (i %% 7 == 0) {
-      column <- c(column, column[i - 1] + rnorm(1, 7, 2))
-    } else{
-      column <- c(column, column[i - 1] + rnorm(1, mean, sd))
-    }
-  }
-  return(column)
-}
-current_assets <- time_series_data(2, 30)
-current_liabilities <- time_series_data(1, 20)
-
 # assumes data is combined in Incorta
 # df <- read_csv()
 df <- data.frame(date, current_assets, current_liabilities)
@@ -80,15 +59,50 @@ ggplot(work_cap, aes(date, difference(working_capital))) +
   geom_line()
 
 # simulating models
-simulation <- generate(arima_fit, h = 36, times = 20) %>%
+simulation <- generate(full_fit, h = 36, times = 15) %>%
   filter(.model == 'auto')
-
 df %>%
-  filter(row_number() >= n() - 100) %>%
-  autoplot(working_capital) +
-  geom_line(
-    aes(y = .sim, group = .rep),
-    alpha = .2,
-    color = 'red',
-    data = simulation
-  )
+  filter(row_number() >= n() - 150) %>%
+  autoplot(working_capital) + autolayer(simulation, .vars = .sim) +
+  geom_line() +
+  theme(legend.position = "none") +
+  ggtitle("Working Capital Simulation") +
+  labs(y = "Working Capital (millions)", x = "Date")
+
+# errors for model
+forecast(arima_fit, h = "3 year") %>%
+  accuracy(data = df, measures = c(crps = CRPS, rmse = RMSE))
+
+# STL decomp individual
+stl_decomp <- model(work_cap, STL(working_capital ~ trend(window = 21) + season(window=13), robust = TRUE))
+autoplot(work_cap, working_capital) + autolayer(components(stl_decomp), trend + season_year, color = "blue")
+
+# cross validation
+cross_validate <- function(data, set_length, steps) {
+  # set_length is the starting training set length
+  data %>%
+    stretch_tsibble(.init = set_length, .step = steps)
+}
+
+# plots 3 year hier forecast
+three_yr_forecast %>%
+  autoplot(hier_data %>% filter(year(date) >= 2001))
+# provides accuracy measures for hier forecasts
+accuracy(three_yr_forecast, hier_data, measures = c(crps = CRPS, mae = MAE, mape = MAPE)) %>% 
+  arrange(desc(name), desc(crps), desc(mae))
+
+# uses lots of different models on hierarchical data
+train_fit <- hier_data %>%
+  filter(year(date) <= 2001) %>%
+  model(arima = ARIMA(working_capital),
+        ets = ETS(working_capital),
+        snaive = SNAIVE(working_capital ~ drift())) %>%
+  reconcile(mint_arima = min_trace(arima, method = "mint_shrink"),
+            mint_ets = min_trace(ets, method = "mint_shrink"),
+            mint_snaive = min_trace(snaive, method = "mint_shrink"))
+
+
+
+
+
+
