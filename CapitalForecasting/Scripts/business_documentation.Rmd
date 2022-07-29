@@ -1,0 +1,173 @@
+---
+title: "Business Documentation"
+author: "Axel Torbenson, Data Science Intern at eCapital Advisors"
+date: '2022-07-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, packages, results="hide", echo=FALSE, message = FALSE}
+library(tidyverse)
+library(tsibble)
+library(fable)
+library(GGally)
+library(feasts)
+library(knitr)
+library(printr)
+library(DT)
+```
+```{r, tidying, results="hide", echo=FALSE}
+# This is some time series data I found on the internet I transformed a bit
+df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documents/templates/CapitalForecasting/Data/working_capital_fake_data.csv")
+# convert to tsibble and add working capital and current ratio
+df <- df %>%
+  mutate(date = yearmonth(as.character(date)),
+         working_capital = assets - liabilities) %>%
+  as_tsibble(index = date)
+
+work_cap <- df %>%
+  filter(row_number() <= n() - 36) %>%
+  as_tsibble(index = date)
+```
+
+# Working Capital Forecasting Dashboard
+
+The goal of this analysis is to use statistical forecasting methods to predict future levels of working capital levels. To do this, we use hierarchical ARIMA modeling. This approach allows us to get accurate and coherent forecasts of both the agggregated series (working capital), as well as its components (current assets and current liabilities). ARIMA is modeling framework that uses historical trends in a time series to forecast and predict future values. The historical trends can include seasonality, relationships between data through time, long term trends, and shorter-term cycles.
+
+ARIMA stands for autoregressive integrated moving average. Breaking this down into seperate pieces:
+
+Autoregressive (AR) refers to regression of a variable on its own lagged terms. As an example, the following table and graph shows a simple time series lagged by one period.
+
+```{r}
+example <- tribble(~Date, ~Value, ~Lagged_Value, ~Differenced,
+"1/1/2022",1,NA,NA,
+"2/1/2022",3,1,2,
+"3/1/2022",4,3,1,
+"4/1/2022",6,4,2,
+"5/1/2022",6,6,0,
+"6/1/2022",8,6,2,
+"7/1/2022",9,8,1,
+"8/1/2022",11,9,2,
+"9/1/2022",12,11,1)
+
+example %>% 
+  select(Date, Value, Lagged_Value) %>% 
+  kable()
+
+
+ggplot(example, aes(Lagged_Value, Value)) +
+  geom_point()
+```
+
+We lose the first data point because there is no data before the beginning of the time series, but it does not significantly effect the analysis.
+
+The Integrated (I) part of ARIMA refers to the differencing of the data. This refers to taking a value and replacing it by the difference between itself and the previous value. This allows other parts of our model to more fully capture cycles and seasonality in our data.
+
+```{r}
+example %>% 
+  select(Date, Value, Differenced) %>% 
+  kable()
+```
+
+
+The Moving Average (MA) part of ARMIA can be thought of as taking a weighted moving average of past forecasting errors.
+
+To adjust for seasonality, we use similar components to those above but instead take into account the seasonality of data; an example would be that there could be more sales in November and December because of Christmas. This needs to be considered to make an accurate forecast.
+
+
+
+
+The AR part of this model refers to if and how the current value is related to previous values. As an example, the following plot shows the relationship between each point and the point before it in time.
+
+```{r}
+ggplot(df, mapping=aes(assets, lag(assets, 1))) +
+  geom_point(na.rm = TRUE)
+  #geom_smooth(method = 'lm', se = FALSE)
+  #geom_abline(aes(slope = 1, intercept = 0))
+
+# for (i in seq(1, 40, 10)) {
+#   plot <- ggplot(df, mapping=aes(assets, lag(assets, i))) +
+#     geom_point(na.rm = TRUE) +
+#     labs(x = "Assets", y = paste(toString(i), "Lagged Assets"))
+#   print(plot)
+# }
+```
+
+What does this tell us? It shows that each point in the future can be predicted with relative accuracy by the point one time period in the past. If we have 12 million dollars of assets today, I'll most likely have around 12 million tomorrow. This relationship can be quantified by 
+
+In this example, if we have 12 million dollars in assets, we could expect about 12.1 million dollars of assets in the next period.
+
+The integrated (I) part of the ARIMA model allows us to look at longer term trends
+
+This graph decomposes working capital levels into three parts: Trend, season, and remainder. The trend shows longer business cycles, the season shows seasonal fluctuations, and the remainder shows what is unaccounted for by the trend and seasonal components.
+
+```{r, decomposition, echo=FALSE}
+work_cap %>%
+  model(STL(working_capital ~ trend(window = 21) +
+              season(window = 13),
+            robust = TRUE)) %>%
+  components(trend) %>%
+  autoplot() +
+  ggtitle("Working Capital Decomposition") +
+  labs(y = "Working Capital (millions)", x = "Date")
+```
+
+```{r, modeling, echo=FALSE}
+arima_fit <- work_cap %>%
+  model(# ARIMA function automatically picks best fitting model using AIC
+    arima = ARIMA(working_capital, ic = 'aic', stepwise = FALSE),
+    )
+# refit to all data
+full_fit <- arima_fit %>%
+  refit(df)
+```
+
+The following graphs show three year forecasts for working capital levels. The first shows the forecast of working capital and the probability distribution around it. The second simulated five different paths working capital could take.
+
+```{r, conf int graph, echo=FALSE}
+forecast(full_fit, h = "3 year") %>%
+  autoplot(filter(df, row_number() >= n() - 50), level = c(70, 95)) +
+  ggtitle("Working Capital Forecast") +
+  labs(y = "Working Capital (millions)", x = "Date")
+```
+
+```{r, sample paths, echo=FALSE}
+simulation <- generate(full_fit, h = 10, times = 5) %>%
+  filter(.model == 'arima')
+
+df %>%
+  filter(row_number() >= n() - 50) %>%
+  autoplot(working_capital) + autolayer(simulation, .vars = .sim) +
+  geom_line() +
+  theme(legend.position = "none") +
+  ggtitle("Working Capital Simulation") +
+  labs(y = "Working Capital (millions)", x = "Date")
+```
+
+The following is a table that contains the forecasted working capital levels, as well as upper and lower bounds of the forecast. We are 95% sure working capital levels will be between the upper and lower bounds.
+
+```{r, table, echo=FALSE}
+three_yr_forecast <- forecast(full_fit, h = "3 year") %>%
+  hilo(95) %>%
+  as_tibble() %>%
+  select(date, .mean, '95%') %>%
+  rename(forecast = .mean) %>%
+  rename(conf_int = '95%') %>%
+  unpack_hilo(conf_int)
+
+three_yr_forecast$conf_int_lower <-
+  round(three_yr_forecast$conf_int_lower, 3)
+three_yr_forecast$conf_int_upper <-
+  round(three_yr_forecast$conf_int_upper, 3)
+three_yr_forecast$forecast <- round(three_yr_forecast$forecast, 3)
+three_yr_forecast$date <- as.Date(three_yr_forecast$date)
+
+datatable(
+  three_yr_forecast,
+  class = 'cell-border stripe',
+  colnames = c("Date", "Forecast", "Lower bound", "Upper bound"),
+  caption = "Point forecast for working capital levels"
+)
+```
