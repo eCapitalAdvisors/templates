@@ -1,10 +1,12 @@
 ---
 title: "MVP"
 output:
+  word_document: default
   html_document: default
   pdf_document: default
-date: '2022-06-27'
+date: '2022-07-05'
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -27,7 +29,7 @@ df <- read_csv("C:/Users/AxelTorbenson/OneDrive - eCapital Advisors, LLC/Documen
 df$date <- as.Date(as.character(df$date), format = "%m/%d/%Y")
 df <- df %>%
   mutate(date = yearmonth(as.character(date)),
-         working_capital = assets - liabilities) %>%
+         working_capital = working_capital) %>%
   as_tsibble(index = date)
 
 work_cap <- df %>%
@@ -35,18 +37,18 @@ work_cap <- df %>%
   as_tsibble(index = date)
 ```
 
-## Working Capital Forecasting Dashboard
+## Working Capital Forecasting
 
-This dashboard uses time series modeling to forecast future working capital levels.
+This dashboard uses time series modeling to forecast future working capital levels. The data used is simulated.
 
 This graph decomposes working capital levels into three parts: Trend, season, and remainder. The trend shows longer business cycles, the season shows seasonal fluctuations, and the remainder shows what is unaccounted for by the trend and seasonal components.
 
-```{r, decomposition, echo=FALSE}
+```{r, decomposition, echo=FALSE, fig.width = 6.75, fig.height = 5.5}
 work_cap %>%
   model(STL(working_capital ~ trend(window = 21) +
               season(window = 13),
             robust = TRUE)) %>%
-  components(trend) %>%
+  components() %>%
   autoplot() +
   ggtitle("Working Capital Decomposition") +
   labs(y = "Working Capital (millions)", x = "Date")
@@ -55,28 +57,27 @@ work_cap %>%
 ```{r, modeling, echo=FALSE}
 arima_fit <- work_cap %>%
   model(# ARIMA function automatically picks best fitting model using AIC
-    arima = ARIMA(working_capital, ic = 'aic', stepwise = FALSE),
-    )
+    auto = ARIMA(working_capital, ic = 'aic', stepwise = FALSE))
 # refit to all data
 full_fit <- arima_fit %>%
   refit(df)
 ```
 
-The following graphs show three year forecasts for working capital levels. The first shows the forecast of working capital and the probability distribution around it. The second simulated five different paths working capital could take.
+The following graphs show three year forecasts for working capital levels. The first shows the forecast of working capital and the probability distribution around it. The second simulates five different paths working capital could take.
 
-```{r, conf int graph, echo=FALSE}
+```{r, conf int graph, echo=FALSE, fig.width = 6.75, fig.height = 4}
 forecast(full_fit, h = "3 year") %>%
-  autoplot(filter(df, row_number() >= n() - 50), level = c(70, 95)) +
+  autoplot(filter(df, row_number() >= n() - 150), level = c(70, 95)) +
   ggtitle("Working Capital Forecast") +
   labs(y = "Working Capital (millions)", x = "Date")
 ```
 
-```{r, sample paths, echo=FALSE}
-simulation <- generate(full_fit, h = 10, times = 5) %>%
-  filter(.model == 'arima')
+```{r, sample paths, echo=FALSE, fig.width = 6.75, fig.height = 4}
+simulation <- generate(full_fit, h = 36, times = 5) %>%
+  filter(.model == 'auto')
 
 df %>%
-  filter(row_number() >= n() - 50) %>%
+  filter(row_number() >= n() - 150) %>%
   autoplot(working_capital) + autolayer(simulation, .vars = .sim) +
   geom_line() +
   theme(legend.position = "none") +
@@ -87,7 +88,7 @@ df %>%
 The following is a table that contains the forecasted working capital levels, as well as upper and lower bounds of the forecast. We are 95% sure working capital levels will be between the upper and lower bounds.
 
 ```{r, table, echo=FALSE}
-three_yr_forecast <- forecast(full_fit, h = "3 year") %>%
+three_yr_forecast <- forecast(full_fit, h = "18 months") %>%
   hilo(95) %>%
   as_tibble() %>%
   select(date, .mean, '95%') %>%
@@ -102,10 +103,10 @@ three_yr_forecast$conf_int_upper <-
 three_yr_forecast$forecast <- round(three_yr_forecast$forecast, 3)
 three_yr_forecast$date <- as.Date(three_yr_forecast$date)
 
-datatable(
+
+kable(
   three_yr_forecast,
   class = 'cell-border stripe',
-  colnames = c("Date", "Forecast", "Lower bound", "Upper bound"),
-  caption = "Point forecast for working capital levels"
+  col.names = c("Date", "Forecast", "Lower bound", "Upper bound")
 )
 ```
